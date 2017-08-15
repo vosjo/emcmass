@@ -104,30 +104,65 @@ if __name__=="__main__":
    import pylab as pl
    
    parameters = ['initial_mass', 'log10_age_yr', 'feh']
-   variables = ['log_L', 'log_Teff', 'log_g', 'feh']
-   nwalkers = 100
-   nsteps = 1000
    limits = None
    
-   print 'Please input the observed variables and their errors'
+   parser = argparse.ArgumentParser()
+   parser.add_argument("-model", type=str, dest='model', default='mist_vvcrit0.0',
+                       help="name of the stellar evolution model grid to use")
+   parser.add_argument("-nwalkers", type=int, dest='nwalkers', default=100,
+                       help="number of walkers in MCMC")
+   parser.add_argument("-nsteps", type=int, dest='nsteps', default=1000,
+                       help="number of steps each walker takes")
+   args, variables = parser.parse_known_args()
    
-   y, yerr = [], []
-   for var in variables:
-      val = raw_input("{} (value, err): ".format(var))
-      val = val.split(',')
-      y.append( float(val[0]) )
-      yerr.append( float(val[1]) )
+   print "================================================================================"
+   print "                                   EMCMASS"
+   print "================================================================================"
+   print ""
+   
+   #-- parse the observables
+   if len(variables) > 0 and len(variables)%3 == 0:
+      variables = np.reshape(variables, (-1, 3))
+      y = np.array(variables[:,1], dtype=float)
+      yerr = np.array(variables[:,2], dtype=float)
+      variables = variables[:,0]
       
-   y, yerr = np.array(y), np.array(yerr)
+   elif len(variables) > 0:
+      print "Could not understand observables!"
+      sys.exit()
    
-   print 'running MCMC'
-   print '\t Parameters: ', parameters
-   print '\t Observables: ', variables
-   print '\t # walkers: ', nwalkers
-   print '\t # steps: ', nsteps
+   else:
+      # using default variables and requesting values on commandline
+      print "Please specify the Observables below:"
+      variables = ['log_L', 'log_Teff', 'log_g', 'feh']
+      y, yerr = [], []
+      for var in variables:
+         val = raw_input("{} (value, err): ".format(var))
+         val = val.split(',')
+         y.append( float(val[0]) )
+         yerr.append( float(val[1]) )
+      
+      y, yerr = np.array(y), np.array(yerr)
+   
+   print "Stellar evolution models: ", args.model, "\n"
+   
+   print "Parameters of the model:"
+   print "   ", parameters, "\n"
+   
+   print "Observables included in fit:"
+   for v, y_, e_ in zip(variables, y, yerr):
+      print "   {} = {} +- {}".format(v, y_, e_)
+   print ""
+   
+   print "MCMC setup:"
+   print "   # walkers:", args.nwalkers
+   print "   # steps:", args.nsteps, "\n"
+   
+   
+   print "================================================================================"
    
    samples = MCMC(parameters, variables, limits, y, yerr, 
-         nwalkers=nwalkers, nsteps=nsteps)
+         nwalkers=args.nwalkers, nsteps=args.nsteps)
    
    # create plot of the results
    

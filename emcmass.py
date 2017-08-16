@@ -14,6 +14,27 @@ def lnlike(theta, y, yerr, **kwargs):
    
    There is no need to check for limits in the likelihood function because
    this is already done in the prior function
+   
+   This function uses :py:func:`models.interpolate` to obtain the synthetic
+   values for the given parameters theta. The logarithm of the likelihood is
+   calculated as:
+   
+   :math:`L( theta | y ) = \exp( - \chi^2 / 2 )`
+   
+   with:
+   
+   :math:`\chi^2 = \sum (model(theta) - y)^2 / yerr^2`
+   
+   :param theta: list of model parameters (normaly mass, fe/h and age)
+   :type theta: list
+   :param y: 1D array of observables
+   :type y: array
+   :param yerr: 1D array containing errors on every observable
+   :type yerr: array
+   
+   :return: logarithm of the likelihood of the model parameters (theta) given 
+            the observables (y) with errors (yerr)
+   :rtype: float
    """
    
    # synthetic parameters
@@ -30,6 +51,18 @@ def lnprior(theta, limits, **kwargs):
    """
    Simple uniform (flat) prior on all three parameters if they 
    are within their range
+   
+   if all parameters are within the provided limits, the the returned 
+   log probability is 0, otherwise it is -inf.
+   
+   :param theta: list of model parameters
+   :type theta: list
+   :param limits: limits on the model parameters
+   :type limits: list of tuples
+   
+   :return: logarithm of the probability of the parameters (theta) given the 
+            model limits
+   :rtype: float
    """
    
    for val, lim in zip(theta, limits):
@@ -41,6 +74,21 @@ def lnprior(theta, limits, **kwargs):
 def lnprob(theta, y, yerr, limits, **kwargs):
    """
    full log probability function combining the prior and the likelihood
+   
+   will return -inf if any of :py:func:`lnprior` or :py:func:`lnlikelyhood` is 
+   infite, otherwise it will return the sum of both functions.
+   
+   :param theta: list of model parameters (normaly mass, fe/h and age)
+   :type theta: list
+   :param y: 1D array of observables
+   :type y: array
+   :param yerr: 1D array containing errors on every observable
+   :type yerr: array
+   :param limits: limits on the model parameters
+   :type limits: list of tuples
+   
+   :return: the sum of the log prior and log likelihood
+   :rtype: float
    """
    lp = lnprior(theta, limits)
    if not np.isfinite(lp):
@@ -58,6 +106,28 @@ def lnprob(theta, y, yerr, limits, **kwargs):
 
 def MCMC(parameters, variables, limits, obs, obs_err, 
          model='mist', nwalkers=100, nsteps=1000):
+   """
+   Main MCMC function
+   
+   :param parameters: list of model parameters to interpolate in between
+   :type parameters: list
+   :param variables: list of observable variables to be used in the likelihood function
+   :type variables: list
+   :param limits: list of limits on the model parameters. Each limit is one tuple 
+                  containing (min, max)
+   :type limits: list of tuples
+   :param obs: array of the observed values for the variables
+   :type obs: np.array
+   :param obs_err: array of the errors on the observations
+   :type obs_err: np.array
+   :param model: name of the stellar evolution models
+   :type model: str
+   :param nwalkers: number of walkers to use (at least twice as many as parameters)
+   :type nwalkers: int
+   :param nsteps: number of steps each walker will take
+   :type nsteps: int
+   :returns: array (#parameters, #walkers * #steps) -- all samples taken by each walker.
+   """
    
    #-- convert limits to keyword arguments for prepare_grid
    lim_kwargs = {}

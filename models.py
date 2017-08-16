@@ -15,18 +15,19 @@ def get_files(evolution_model):
    with a list of the metalicity of each file
    
    curently recognized models are: 
-    - mist_vvcrit0.0
+    - mist: MESA Isochrones & Stellar tracks with v/vcrit = 0.0
+    - yapsi: Yale Potsdam Stellar Isochrones
    """
    
-   if evolution_model == 'mist_vvcrit0.0' or evolution_model == 'mist':
-      files = glob.glob('MIST/MIST_v1.0_feh_*_afe_p0.0_vvcrit0.0_basic.fits')
+   if evolution_model == 'mist':
+      files = glob.glob('Models/MIST_vvcrit0.0_feh_*.fits')
    
-   elif evolution_model == 'mist_vvcrit0.4':
-      files = glob.glob('MIST/MIST_v1.0_feh_*_afe_p0.0_vvcrit0.4_basic.fits')
+   elif evolution_model == 'yapsi':
+      files = glob.glob('Models/YaPSI_feh_*.fits')
    
    else:
       # default to MIST if models not recognized
-      files = glob.glob('MIST/MIST_v1.0_feh_*_afe_p0.0_vvcrit0.0_basic.fits')
+      files = glob.glob('Models/MIST_vvcrit0.0_feh_*.fits')
    
    files = sorted(files)
    
@@ -38,9 +39,9 @@ def get_files(evolution_model):
    
    return files, z
 
-def prepare_grid(evolution_model='mist_vvcrit0.0',
-                 parameters=['initial_mass', 'log10_age_yr', 'feh'], 
-                 variables=['log_L', 'log_Teff', 'log_g', 'feh'],
+def prepare_grid(evolution_model='mist',
+                 parameters=['Mass_init', 'M/H_init', 'log_Age'], 
+                 variables=['log_L', 'log_Teff', 'log_g', 'M_H'],
                  set_default=False, 
                  **kwargs):
    """
@@ -59,7 +60,7 @@ def prepare_grid(evolution_model='mist_vvcrit0.0',
    grid_pars = []
    grid_vars = []
    
-   fehlim = kwargs.pop('feh_lim', (-np.inf, np.inf))
+   fehlim = kwargs.pop('M_H_lim', (-np.inf, np.inf))
    
    for filename, z in zip(files, fehs):
       
@@ -163,9 +164,22 @@ def get_track(mass, feh, **kwargs):
 
 if __name__=="__main__":
 
- axis_values, pixelgrid = prepare_grid(parameters=['initial_mass', 'log10_age_yr', 'feh'], 
-                         variables=['log_L', 'log_Teff', 'log_g', 'feh'],
-                         log10_age_yr_lim=(5.0, 9.0),
-                         initial_mass_lim = (0.4, 2.6), 
-                         feh_lim = (-1.0, 0.5),
-                          )
+   grid1 = prepare_grid(evolution_model='mist',
+                        parameters=['Mass_init', 'M_H_init', 'log_Age'], 
+                        variables=['log_L', 'log_Teff', 'log_g', 'M_H'],
+                        log_Age_lim=(5.0, 9.0),
+                        Mass_init_lim = (0.4, 2.6), 
+                        M_H_init_lim = (-1.0, 0.5),
+                        )
+
+   grid2 = prepare_grid(evolution_model='yapsi',
+                        parameters=['Mass_init', 'M_H_init', 'log_Age'], 
+                        variables=['log_L', 'log_Teff', 'log_g', 'M_H'],
+                        log_Age_lim=(5.0, 9.0),
+                        Mass_init_lim = (0.4, 2.6), 
+                        M_H_init_lim = (-1.0, 0.5),
+                        )
+   
+   
+   print interpolate(1.23, 0.125, 6.37, grid=grid1)
+   print interpolate(1.23, 0.125, 6.37, grid=grid2)

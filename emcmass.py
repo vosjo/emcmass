@@ -57,7 +57,7 @@ def lnprob(theta, y, yerr, limits, **kwargs):
 #{ MCMC stuff
 
 def MCMC(parameters, variables, limits, obs, obs_err, 
-         nwalkers=100, nsteps=1000):
+         model='mist', nwalkers=100, nsteps=1000):
    
    #-- convert limits to keyword arguments for prepare_grid
    lim_kwargs = {}
@@ -65,7 +65,8 @@ def MCMC(parameters, variables, limits, obs, obs_err,
       for p, l in zip(parameters, limits):
          lim_kwargs[p+'_lim'] = l
    
-   grid = models.prepare_grid(parameters=parameters, variables=variables,
+   grid = models.prepare_grid(evolution_model=model,
+                              parameters=parameters, variables=variables,
                               set_default=True, **lim_kwargs)
    
    #-- It is possible that the grid point do not directly correspond with
@@ -103,11 +104,11 @@ if __name__=="__main__":
    import corner
    import pylab as pl
    
-   parameters = ['initial_mass', 'log10_age_yr', 'feh']
+   parameters = ['Mass_init', 'M_H_init', 'log_Age']
    limits = None
    
    parser = argparse.ArgumentParser()
-   parser.add_argument("-model", type=str, dest='model', default='mist_vvcrit0.0',
+   parser.add_argument("-model", type=str, dest='model', default='mist',
                        help="name of the stellar evolution model grid to use")
    parser.add_argument("-nwalkers", type=int, dest='nwalkers', default=100,
                        help="number of walkers in MCMC")
@@ -162,7 +163,7 @@ if __name__=="__main__":
    print "================================================================================"
    
    samples = MCMC(parameters, variables, limits, y, yerr, 
-         nwalkers=args.nwalkers, nsteps=args.nsteps)
+                  model=args.model, nwalkers=args.nwalkers, nsteps=args.nsteps)
    
    # create plot of the results
    
@@ -184,8 +185,9 @@ if __name__=="__main__":
 
    fig = corner.corner(samples, 
                      labels=[r"Mass ($\boldsymbol{ M_{\odot} }$)", 
-                              r"$\boldsymbol{ \log({\rm age}) }$ (yr)", 
-                              "[Fe/H] (dex)"],
+                             "[Fe/H] (dex)",
+                             r"$\boldsymbol{ \log({\rm age}) }$ (yr)", 
+                             ],
                      quantiles=[0.16, 0.5, 0.84],
                      show_titles=True, title_kwargs={"fontsize": 12})
 

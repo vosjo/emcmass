@@ -114,6 +114,12 @@ if __name__=="__main__":
                        help="number of walkers in MCMC")
    parser.add_argument("-nsteps", type=int, dest='nsteps', default=1000,
                        help="number of steps each walker takes")
+   parser.add_argument("-mass", type=float, dest='mass_lim', nargs=2, default=(0.1, 5.0),
+                       help="limit the search in mass")
+   parser.add_argument("-M_H", type=float, dest='mh_lim', nargs=2, default=(-1.5, 0.5),
+                       help="limit the search in [M/H]")
+   parser.add_argument("-age", type=float, dest='age_lim', nargs=2, default=(4, 10.3),
+                       help="limit the search in log(Age)")
    args, variables = parser.parse_known_args()
    
    print "================================================================================"
@@ -147,8 +153,12 @@ if __name__=="__main__":
    
    print "Stellar evolution models: ", args.model, "\n"
    
-   print "Parameters of the model:"
-   print "   ", parameters, "\n"
+   # parse the limits
+   limits = [args.mass_lim, args.mh_lim, args.age_lim]
+   print "Limits applied to the model grid parameters:"
+   for p, l in zip(parameters, limits):
+      print "   {} = {} -> {}".format(p, l[0], l[1])
+   print ""
    
    print "Observables included in fit:"
    for v, y_, e_ in zip(variables, y, yerr):

@@ -117,7 +117,7 @@ def interpolate(mass, age, feh, **kwargs):
    elif not defaults is None:
       axis_values, pixelgrid = defaults
    else:
-      axis_values, pixelgrid = prepare_grid()
+      axis_values, pixelgrid = prepare_grid(**kwargs)
    
    multiple = False
    if not hasattr(mass, '__iter__') or not hasattr(age, '__iter__') or \
@@ -142,7 +142,27 @@ def get_isochrone(age, feh, **kwargs):
    The mass points of the track are the gridpoints included in the evolution grid
    """
    
-   mass = sorted(set(axis_values[0]))
+   #-- get the mass values
+   #   if mass values are provided in kwargs it is easy, otherwise we need to get
+   #   the axis_values from the prepared pixel grid, which can be provided in the
+   #   grid keyword, in the defaults of the module, or in the last case needs to 
+   #   be calculated.
+   #   if the grid needs to be prepared, we store it and provide it in the grid 
+   #   kwarg to the interpolate function
+   global defaults
+   mass = None
+   if 'mass' in kwargs:
+      mass = kwargs.pop('mass')
+   elif 'grid' in kwargs:
+      axis_values, pixelgrid = kwargs['grid']
+   elif not defaults is None:
+      axis_values, pixelgrid = defaults
+      kwargs['grid'] == (axis_values, pixelgrid)
+   else:
+      axis_values, pixelgrid = prepare_grid(**kwargs)
+      kwargs['grid'] == (axis_values, pixelgrid)
+   
+   mass = sorted(set(axis_values[0])) if mass is None else mass
    
    age = np.ones_like(mass) * age
    feh = np.ones_like(mass) * feh
@@ -155,7 +175,27 @@ def get_track(mass, feh, **kwargs):
    The age points of the track are the gridpoints included in the evolution grid
    """
    
-   age = sorted(set(axis_values[1]))
+   #-- get the age values
+   #   if age values are provided in kwargs it is easy, otherwise we need to get
+   #   the axis_values from the prepared pixel grid, which can be provided in the
+   #   grid keyword, in the defaults of the module, or in the last case, needs to 
+   #   be calculated.
+   #   if the grid needs to be prepared, we store it and provide it in the grid 
+   #   kwarg to the interpolate function
+   global defaults
+   age = None
+   if 'age' in kwargs:
+      age = kwargs.pop('age')
+   elif 'grid' in kwargs:
+      axis_values, pixelgrid = kwargs['grid']
+   elif not defaults is None:
+      axis_values, pixelgrid = defaults
+      kwargs['grid'] == (axis_values, pixelgrid)
+   else:
+      axis_values, pixelgrid = prepare_grid(**kwargs)
+      kwargs['grid'] == (axis_values, pixelgrid)
+   
+   age = sorted(set(axis_values[2])) if age is None else age
    
    mass = np.ones_like(age) * mass
    feh = np.ones_like(age) * feh

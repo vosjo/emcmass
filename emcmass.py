@@ -105,7 +105,8 @@ def lnprob(theta, y, yerr, limits, **kwargs):
 #{ MCMC stuff
 
 def MCMC(parameters, variables, limits, obs, obs_err, 
-         model='mist', nwalkers=100, nsteps=1000, percentiles=[16, 50, 84], return_chain=False):
+         model='mist', nwalkers=100, nsteps=1000, percentiles=[16, 50, 84], 
+         return_chain=False, **kwargs):
    """
    Main MCMC function
    
@@ -141,7 +142,10 @@ def MCMC(parameters, variables, limits, obs, obs_err,
       for p, l in zip(parameters, limits):
          lim_kwargs[p+'_lim'] = l
    
-   grid = models.prepare_grid(evolution_model=model,
+   if 'grid' in kwargs:
+      grid = kwargs.pop(grid)
+   else:
+      grid = models.prepare_grid(evolution_model=model,
                               parameters=parameters, variables=variables,
                               set_default=True, **lim_kwargs)
    

@@ -105,7 +105,7 @@ def lnprob(theta, y, yerr, limits, **kwargs):
 #{ MCMC stuff
 
 def MCMC(parameters, variables, limits, obs, obs_err, 
-         model='mist', nwalkers=100, nsteps=1000):
+         model='mist', nwalkers=100, nsteps=1000, percentiles=[16, 50, 84], return_chain=False):
    """
    Main MCMC function
    
@@ -126,6 +126,12 @@ def MCMC(parameters, variables, limits, obs, obs_err,
    :type nwalkers: int
    :param nsteps: number of steps each walker will take
    :type nsteps: int
+   :param percentiles: the percentiles used to calculate the final values and uncertainties
+                       used as argument for np.percentile()
+   :type percentiles: list
+   :param return_chain: if true, the whole Markov chain is returned, otherwise on the 
+                        values and errors (lower and upper) for the parameters
+   :type return_chain: bool
    :returns: array (#parameters, #walkers * #steps) -- all samples taken by each walker.
    """
    
@@ -163,7 +169,15 @@ def MCMC(parameters, variables, limits, obs, obs_err,
    #-- remove first 50 steps and combine the results from the individual walkers
    samples = sampler.chain[:, 50:, :].reshape((-1, ndim))
    
-   return samples
+   #-- calculate the values and uncertainties based on the 16th, 50th, and 84th percentiles
+   #   or whatever percentiles are given by the user
+   pc  = np.percentile(samples, percentiles, axis=0)
+   results = [(v, e1, e2) for v, e1, e2 in zip(pc[1], pc[1]-pc[0], pc[2]-pc[1])]
+   
+   if return_chain:
+      return results, samples
+   
+   return results
 
 #}
 
@@ -171,7 +185,6 @@ if __name__=="__main__":
    
    import sys
    import argparse
-   import corner
    import pylab as pl
    
    parameters = ['Mass_init', 'M_H_init', 'log_Age']
@@ -242,10 +255,21 @@ if __name__=="__main__":
    
    print "================================================================================"
    
-   samples = MCMC(parameters, variables, limits, y, yerr, 
+   results, samples = MCMC(parameters, variables, limits, y, yerr, return_chain=True,
                   model=args.model, nwalkers=args.nwalkers, nsteps=args.nsteps)
    
-   # create plot of the results
+   print "================================================================================"
+   print ""
+   print "Resulting parameters values and errors:"
+   for p, r in zip(parameters, results):
+      print "   {} = {:0.3f} -{:0.3f} +{:0.3f}".format(p, r[0], r[1], r[2])
+   
+   
+   # create plot of the results if the corner package exists
+   try:
+      import corner
+   except Exception, e:
+      sys.exit()
    
    params = {'backend': 'pdf',
    'ps.usedistiller': 'xpdf',

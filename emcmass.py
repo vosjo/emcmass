@@ -151,8 +151,6 @@ def MCMC(parameters, variables, limits, obs, obs_err,
    limits = [(np.min(n),np.max(n)) for n in grid[0]]
    print "New limits to match up with grid points:"
    print limits
-         
-   
    
    #-- initialize the walkers
    #   Here we initialize them at random within the allowed ranges

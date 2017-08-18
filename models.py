@@ -1,6 +1,7 @@
 
 import numpy as np
 
+import os
 import re 
 import glob
 import pyfits
@@ -8,6 +9,8 @@ import pyfits
 import interpol
 
 defaults = None
+
+basedir = os.path.dirname(__file__)
 
 def get_files(evolution_model):
    """
@@ -19,15 +22,19 @@ def get_files(evolution_model):
     - yapsi: Yale Potsdam Stellar Isochrones
    """
    
+   modeldir = os.path.join(basedir, 'Models')
+   
    if evolution_model == 'mist':
-      files = glob.glob('Models/MIST_vvcrit0.0_feh_*.fits')
+      filename = 'MIST_vvcrit0.0_feh_*.fits'
    
    elif evolution_model == 'yapsi':
-      files = glob.glob('Models/YaPSI_feh_*.fits')
+      filename = 'YaPSI_feh_*.fits'
    
    else:
       # default to MIST if models not recognized
-      files = glob.glob('Models/MIST_vvcrit0.0_feh_*.fits')
+      filename = 'MIST_vvcrit0.0_feh_*.fits'
+   
+   files = glob.glob(os.path.join(basedir, 'Models', filename))
    
    files = sorted(files)
    
@@ -40,7 +47,7 @@ def get_files(evolution_model):
    return files, z
 
 def prepare_grid(evolution_model='mist',
-                 parameters=['Mass_init', 'M/H_init', 'log_Age'], 
+                 parameters=['Mass_init', 'M_H_init', 'log_Age'], 
                  variables=['log_L', 'log_Teff', 'log_g', 'M_H'],
                  set_default=False, 
                  **kwargs):
@@ -105,7 +112,7 @@ def prepare_grid(evolution_model='mist',
    return axis_values, pixelgrid
          
 
-def interpolate(mass, age, feh, **kwargs):
+def interpolate(mass, feh, age, **kwargs):
    """
    Returns the requested values from the stellar evolution grids at the given 
    values for the input parameters (mass, feh, age)
@@ -127,7 +134,7 @@ def interpolate(mass, age, feh, **kwargs):
       feh = np.array(feh)
       multiple = True
    
-   p = np.vstack([mass, age, feh])
+   p = np.vstack([mass, feh, age])
    
    values = interpol.interpolate(p, axis_values, pixelgrid)
    

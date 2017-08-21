@@ -104,7 +104,7 @@ def lnprob(theta, y, yerr, limits, **kwargs):
 
 #{ MCMC stuff
 
-def MCMC(parameters, variables, limits, obs, obs_err, 
+def MCMC(variables, limits, obs, obs_err, 
          model='mist', nwalkers=100, nsteps=1000, percentiles=[16, 50, 84], 
          return_chain=False, **kwargs):
    """
@@ -139,14 +139,13 @@ def MCMC(parameters, variables, limits, obs, obs_err,
    #-- convert limits to keyword arguments for prepare_grid
    lim_kwargs = {}
    if not limits is None:
-      for p, l in zip(parameters, limits):
+      for p, l in zip(models.parameters, limits):
          lim_kwargs[p+'_lim'] = l
    
    if 'grid' in kwargs:
       grid = kwargs.pop(grid)
    else:
-      grid = models.prepare_grid(evolution_model=model,
-                              parameters=parameters, variables=variables,
+      grid = models.prepare_grid(evolution_model=model, variables=variables,
                               set_default=True, **lim_kwargs)
    
    #-- It is possible that the grid point do not directly correspond with
@@ -162,7 +161,7 @@ def MCMC(parameters, variables, limits, obs, obs_err,
    pos = np.array(pos).T
 
    #-- setup the sampler
-   ndim = len(parameters)
+   ndim = len(models.parameters)
    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(obs, obs_err, limits))
    
    #-- run the sampler
@@ -188,9 +187,6 @@ if __name__=="__main__":
    import sys
    import argparse
    import pylab as pl
-   
-   parameters = ['Mass_init', 'M_H_init', 'log_Age']
-   limits = None
    
    parser = argparse.ArgumentParser()
    parser.add_argument("-model", type=str, dest='model', default='mist',
@@ -241,7 +237,7 @@ if __name__=="__main__":
    # parse the limits
    limits = [args.mass_lim, args.mh_lim, args.age_lim]
    print "Limits applied to the model grid parameters:"
-   for p, l in zip(parameters, limits):
+   for p, l in zip(models.parameters, limits):
       print "   {} = {} -> {}".format(p, l[0], l[1])
    print ""
    
@@ -257,13 +253,13 @@ if __name__=="__main__":
    
    print "================================================================================"
    
-   results, samples = MCMC(parameters, variables, limits, y, yerr, return_chain=True,
+   results, samples = MCMC(variables, limits, y, yerr, return_chain=True,
                   model=args.model, nwalkers=args.nwalkers, nsteps=args.nsteps)
    
    print "================================================================================"
    print ""
    print "Resulting parameters values and errors:"
-   for p, r in zip(parameters, results):
+   for p, r in zip(models.parameters, results):
       print "   {} = {:0.3f} -{:0.3f} +{:0.3f}".format(p, r[0], r[1], r[2])
    
    

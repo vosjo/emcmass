@@ -9,6 +9,7 @@ import pyfits
 import interpol
 
 defaults = None
+parameters = ['Mass_init', 'M_H_init', 'log_Age']
 
 basedir = os.path.dirname(__file__)
 
@@ -47,7 +48,6 @@ def get_files(evolution_model):
    return files, z
 
 def prepare_grid(evolution_model='mist',
-                 parameters=['Mass_init', 'M_H_init', 'log_Age'], 
                  variables=['log_L', 'log_Teff', 'log_g', 'M_H'],
                  set_default=False, 
                  **kwargs):
@@ -143,7 +143,7 @@ def interpolate(mass, feh, age, **kwargs):
       
    return values
 
-def get_isochrone(age, feh, **kwargs):
+def get_isochrone(feh, age, **kwargs):
    """
    returns an isochrone for the requested metalicity and age
    The mass points of the track are the gridpoints included in the evolution grid
@@ -164,17 +164,17 @@ def get_isochrone(age, feh, **kwargs):
       axis_values, pixelgrid = kwargs['grid']
    elif not defaults is None:
       axis_values, pixelgrid = defaults
-      kwargs['grid'] == (axis_values, pixelgrid)
+      kwargs['grid'] = (axis_values, pixelgrid)
    else:
       axis_values, pixelgrid = prepare_grid(**kwargs)
-      kwargs['grid'] == (axis_values, pixelgrid)
+      kwargs['grid'] = (axis_values, pixelgrid)
    
    mass = sorted(set(axis_values[0])) if mass is None else mass
    
    age = np.ones_like(mass) * age
    feh = np.ones_like(mass) * feh
    
-   return interpolate(mass, age, feh, **kwargs)
+   return interpolate(mass, feh, age, **kwargs)
 
 def get_track(mass, feh, **kwargs):
    """
@@ -197,22 +197,21 @@ def get_track(mass, feh, **kwargs):
       axis_values, pixelgrid = kwargs['grid']
    elif not defaults is None:
       axis_values, pixelgrid = defaults
-      kwargs['grid'] == (axis_values, pixelgrid)
+      kwargs['grid'] = (axis_values, pixelgrid)
    else:
       axis_values, pixelgrid = prepare_grid(**kwargs)
-      kwargs['grid'] == (axis_values, pixelgrid)
+      kwargs['grid'] = (axis_values, pixelgrid)
    
    age = sorted(set(axis_values[2])) if age is None else age
    
    mass = np.ones_like(age) * mass
    feh = np.ones_like(age) * feh
    
-   return interpolate(mass, age, feh, **kwargs)
+   return interpolate(mass, feh, age, **kwargs)
 
 if __name__=="__main__":
 
    grid1 = prepare_grid(evolution_model='mist',
-                        parameters=['Mass_init', 'M_H_init', 'log_Age'], 
                         variables=['log_L', 'log_Teff', 'log_g', 'M_H'],
                         log_Age_lim=(5.0, 9.0),
                         Mass_init_lim = (0.4, 2.6), 
@@ -220,7 +219,6 @@ if __name__=="__main__":
                         )
 
    grid2 = prepare_grid(evolution_model='yapsi',
-                        parameters=['Mass_init', 'M_H_init', 'log_Age'], 
                         variables=['log_L', 'log_Teff', 'log_g', 'M_H'],
                         log_Age_lim=(5.0, 9.0),
                         Mass_init_lim = (0.4, 2.6), 

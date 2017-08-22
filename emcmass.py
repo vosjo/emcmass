@@ -147,6 +147,9 @@ def MCMC(variables, limits, obs, obs_err,
    else:
       grid = models.prepare_grid(evolution_model=model, variables=variables,
                               set_default=True, **lim_kwargs)
+      
+   #-- set this grid as the default one
+   models.defaults=grid
    
    #-- It is possible that the grid point do not directly correspond with
    #   the given limits. to avoid out of grid errors, we adapt the limits

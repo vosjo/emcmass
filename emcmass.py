@@ -143,7 +143,7 @@ def MCMC(variables, limits, obs, obs_err,
          lim_kwargs[p+'_lim'] = l
    
    if 'grid' in kwargs:
-      grid = kwargs.pop(grid)
+      grid = kwargs.pop('grid')
    else:
       grid = models.prepare_grid(evolution_model=model, variables=variables,
                               set_default=True, **lim_kwargs)
@@ -157,7 +157,13 @@ def MCMC(variables, limits, obs, obs_err,
    
    #-- initialize the walkers
    #   Here we initialize them at random within the allowed ranges
+   #   But we take random ages in yrs instead of in log(yrs) to prevent oversampling 
+   #   young stars
    pos = [ np.random.uniform(lim[0], lim[1], nwalkers) for lim in limits]
+   if 'log_Age' in models.parameters:
+      i = models.parameters.index('log_Age')
+      a1, a2 = limits[i]
+      pos[i] = np.log10(np.random.uniform(10**a1, 10**a2, nwalkers))
    pos = np.array(pos).T
 
    #-- setup the sampler
@@ -169,6 +175,7 @@ def MCMC(variables, limits, obs, obs_err,
 
    #-- remove first 50 steps and combine the results from the individual walkers
    samples = sampler.chain[:, 50:, :].reshape((-1, ndim))
+      
    
    #-- calculate the values and uncertainties based on the 16th, 50th, and 84th percentiles
    #   or whatever percentiles are given by the user

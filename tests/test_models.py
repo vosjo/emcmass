@@ -4,6 +4,28 @@ import  unittest
 
 from emcmass import models
 
+class TestGetFiles(unittest.TestCase):
+   
+   def test_mist_files(self):
+      
+      files, z = models.get_files('mist')
+      
+      self.assertTrue(-4.0 in z)
+      self.assertTrue(0.5 in z)
+      
+      for filename in files:
+         self.assertTrue('MIST' in filename)
+   
+   def test_yapsi_files(self):
+      
+      files, z = models.get_files('yapsi')
+      
+      self.assertTrue(-1.5 in z)
+      self.assertTrue(0.3 in z)
+      
+      for filename in files:
+         self.assertTrue('YaPSI' in filename)
+   
 class TestPrepareGrid(unittest.TestCase):
    
    def setUp(self):

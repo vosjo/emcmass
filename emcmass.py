@@ -209,7 +209,7 @@ if __name__=="__main__":
                        help="limit the search in mass")
    parser.add_argument("-M_H", type=float, dest='mh_lim', nargs=2, default=(-1.5, 0.5),
                        help="limit the search in [M/H]")
-   parser.add_argument("-age", type=float, dest='age_lim', nargs=2, default=(4, 10.3),
+   parser.add_argument("-age", type=float, dest='age_lim', nargs=2, default=(0.0, 4.0),
                        help="limit the search in log(Age)")
    args, variables = parser.parse_known_args()
    
@@ -223,7 +223,7 @@ if __name__=="__main__":
       variables = np.reshape(variables, (-1, 3))
       y = np.array(variables[:,1], dtype=float)
       yerr = np.array(variables[:,2], dtype=float)
-      variables = variables[:,0]
+      variables = np.array(variables[:,0], dtype='a10')
       
    elif len(variables) > 0:
       print "Could not understand observables!"
@@ -232,15 +232,25 @@ if __name__=="__main__":
    else:
       # using default variables and requesting values on commandline
       print "Please specify the Observables below:"
-      variables = ['log_L', 'log_Teff', 'log_g', 'feh']
+      variables = ['log_L', 'log_Teff', 'log_g', 'log_R', 'feh']
       y, yerr = [], []
       for var in variables:
          val = raw_input("{} (value, err): ".format(var))
+         if val == '': continue
          val = val.split(',')
          y.append( float(val[0]) )
          yerr.append( float(val[1]) )
       
       y, yerr = np.array(y), np.array(yerr)
+      
+      
+   #-- check if variables need to be converted to log(variable)
+   for par in ['L', 'R', 'Teff', 'g']:
+      if par in variables:
+         i = np.where(variables == par)
+         variables[i] = 'log_'+par
+         yerr[i] = 0.434 * yerr[i] / y[i]
+         y[i] = np.log10(y[i])
    
    print "Stellar evolution models: ", args.model, "\n"
    

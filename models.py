@@ -9,7 +9,7 @@ import pyfits
 import interpol
 
 defaults = None
-parameters = ['Mass_init', 'M_H_init', 'log_Age']
+parameters = ['Mass_init', 'M_H_init', 'phase']
 
 basedir = os.path.dirname(__file__)
 
@@ -213,18 +213,18 @@ if __name__=="__main__":
 
    grid1 = prepare_grid(evolution_model='mist',
                         variables=['log_L', 'log_Teff', 'log_g', 'M_H'],
-                        log_Age_lim=(5.0, 9.0),
+                        phase_lim=(1.0, 4.0),
                         Mass_init_lim = (0.4, 2.6), 
                         M_H_init_lim = (-1.0, 0.5),
                         )
 
-   grid2 = prepare_grid(evolution_model='yapsi',
-                        variables=['log_L', 'log_Teff', 'log_g', 'M_H'],
-                        log_Age_lim=(5.0, 9.0),
-                        Mass_init_lim = (0.4, 2.6), 
-                        M_H_init_lim = (-1.0, 0.5),
-                        )
+   #grid2 = prepare_grid(evolution_model='yapsi',
+                        #variables=['log_L', 'log_Teff', 'log_g', 'M_H'],
+                        #log_Age_lim=(5.0, 9.0),
+                        #Mass_init_lim = (0.4, 2.6), 
+                        #M_H_init_lim = (-1.0, 0.5),
+                        #)
    
    
-   print interpolate(1.23, 0.125, 6.37, grid=grid1)
-   print interpolate(1.23, 0.125, 6.37, grid=grid2)
+   print interpolate(1.23, 0.125, 1.5, grid=grid1)
+   #print interpolate(1.23, 0.125, 6.37, grid=grid2)

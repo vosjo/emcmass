@@ -7,7 +7,7 @@ import numpy as np
 
 import emcee
 
-import models, mcmc
+import models, mcmc, plotting
 
 
 default = """
@@ -179,31 +179,43 @@ if __name__=="__main__":
    except Exception, e:
       sys.exit()
    
-   params = {'backend': 'pdf',
-   'ps.usedistiller': 'xpdf',
-   'font.family': 'cm',
-   'mathtext.fontset': 'cm',
-   'text.latex.preamble':[r"\usepackage{amsmath}"], # to use \boldsymbol{} in mathtext
-   'font.size' : 9,
-   'axes.labelsize': 12,
-   'legend.fontsize': 9,
-   'xtick.labelsize': 12,
-   'ytick.labelsize': 12,
-   'axes.linewidth': 1.0,
-   'text.usetex': True,
-   'figure.dpi': 100
-   }
-   pl.rcParams.update(params)
+   #-- Plotting 
    
-   pars = []
-   for p in ['mass_init', 'M_H_init', 'phase', 'age']:
-      if p in samples.dtype.names: pars.append(p)
+   for i in range(10):
       
-   data = samples[pars]
+      pindex = 'plot'+str(i)
+      if not pindex in setup: continue
+   
+      if setup[pindex]['type'] == 'distribution':
+         
+         pars = []
+         for p in setup[pindex].get('parameters', ['mass_init', 'M_H_init', 'phase']):
+            if p in samples.dtype.names: pars.append(p)
+            
+         data = samples[pars]
 
-   fig = corner.corner(data.view(np.float64).reshape(data.shape + (-1,)), 
-                     #labels=data.dtype.names,
-                     quantiles=[0.16, 0.5, 0.84],
+         fig = corner.corner(data.view(np.float64).reshape(data.shape + (-1,)), 
+                     labels=[plotting.get_label(p) for p in data.dtype.names],
+                     quantiles=setup[pindex].get('quantiles', [0.025, 0.16, 0.5, 0.84, 0.975]),
+                     levels=setup[pindex].get('levels', [0.393, 0.865, 0.95]),
                      show_titles=True, title_kwargs={"fontsize": 12})
+   
+   #params = {'backend': 'pdf',
+   #'ps.usedistiller': 'xpdf',
+   #'font.family': 'cm',
+   #'mathtext.fontset': 'cm',
+   #'text.latex.preamble':[r"\usepackage{amsmath}"], # to use \boldsymbol{} in mathtext
+   #'font.size' : 9,
+   #'axes.labelsize': 12,
+   #'legend.fontsize': 9,
+   #'xtick.labelsize': 12,
+   #'ytick.labelsize': 12,
+   #'axes.linewidth': 1.0,
+   #'text.usetex': True,
+   #'figure.dpi': 100
+   #}
+   #pl.rcParams.update(params)
+   
+   
 
    pl.show()

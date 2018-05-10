@@ -1,4 +1,5 @@
 import sys
+import yaml
 import argparse
 
 import pylab as pl
@@ -8,23 +9,62 @@ import emcee
 
 import models, mcmc
 
-import mcmc
+
+default = """
+# parameters of the evolution models to fit
+parameters: [mass_init, M_H_init, phase]
+# limits that you want to apply to the parameters (same order as parameters)
+limits:
+- [0.1, 2.0]
+- [-4.0, 0.5]
+- [0, 400]
+# Observables name: [value, error]
+observables: 
+  Teff: [5740, 50]
+  L: [1.0, 0.1]
+  R: [1.0, 0.1]
+  log_g: [4.5, 0.2]
+  M_H: [0.0, 0.1]
+# The name of the evolution model to use (mist, yapsi)
+model: mist
+# setup for the MCMC algorithm
+nwalkers: 100    # total number of walkers
+nsteps: 2000     # steps taken by each walker (not including burn-in)
+nrelax: 500      # burn-in steps taken by each walker
+a: 10            # relative size of the steps taken
+# output options
+datafile: none   # filepath to write results of all walkers
+plot1:
+ type: fit
+ path: fit.png
+plot2:
+ type: distribution
+ path: distribution.png
+ parameters: ['mass', 'phase', 'M_H']
+"""
+
 
 if __name__=="__main__":
    
    parser = argparse.ArgumentParser()
+   parser.add_argument("-f", type=str, dest='filename', default=None,
+                       help="use the setup given in this yaml file")
+   parser.add_argument("-empty", type=str, dest='defaultfile', default=None,
+                       help="create a default setup file with the given name.")
    parser.add_argument("-model", type=str, dest='model', default='mist',
                        help="name of the stellar evolution model grid to use")
    parser.add_argument("-nwalkers", type=int, dest='nwalkers', default=100,
                        help="number of walkers in MCMC")
    parser.add_argument("-nsteps", type=int, dest='nsteps', default=1000,
                        help="number of steps each walker takes")
+   parser.add_argument("-a", type=int, dest='a', default=2,
+                       help="scaling factor for the step size")
    parser.add_argument("-mass", type=float, dest='mass_lim', nargs=2, default=(0.1, 5.0),
                        help="limit the search in mass")
    parser.add_argument("-M_H", type=float, dest='mh_lim', nargs=2, default=(-1.5, 0.5),
                        help="limit the search in [M/H]")
-   parser.add_argument("-age", type=float, dest='age_lim', nargs=2, default=(0, 400),
-                       help="limit the search in log(Age)")
+   parser.add_argument("-phase", type=float, dest='phase_lim', nargs=2, default=(0, 400),
+                       help="limit the search in evolutionary phase")
    args, variables = parser.parse_known_args()
    
    print "================================================================================"
@@ -32,31 +72,65 @@ if __name__=="__main__":
    print "================================================================================"
    print ""
    
-   #-- parse the observables
-   if len(variables) > 0 and len(variables)%3 == 0:
-      variables = np.reshape(variables, (-1, 3))
-      y = np.array(variables[:,1], dtype=float)
-      yerr = np.array(variables[:,2], dtype=float)
-      variables = np.array(variables[:,0], dtype='a10')
-      
-   elif len(variables) > 0:
-      print "Could not understand observables!"
+   if not args.defaultfile is None:
+      ofile = open(args.defaultfile, 'w')
+      ofile.write(default)
+      ofile.close()
+      print "Written default setup file to: " + args.defaultfile
       sys.exit()
    
+   if not args.filename is None:
+      # First check if there is a setup file given and use that to run.
+      #================================================================
+      
+      setupfile = open(args.filename)
+      setup = yaml.safe_load(setupfile)
+      setupfile.close()
+      
+      parameters = setup.get('parameters', ['mass_init', 'M_H_init', 'phase'])
+      limits = setup.get('limits', None)
+      
+      variables = np.array(setup['observables'].keys(), dtype='a10')
+      y = np.array([setup['observables'][key][0] for key in variables])
+      yerr = np.array([setup['observables'][key][1] for key in variables])
+      
+      model = setup.get('model', 'mist')
+      
+      mcmc_kws = dict(nwalkers=setup.get('nwalkers', 100),
+                      nsteps=setup.get('nsteps', 1000),
+                      a=setup.get('a', 2))
+   
    else:
-      # using default variables and requesting values on commandline
-      print "Please specify the Observables below:"
-      variables = ['log_L', 'log_Teff', 'log_g', 'log_R', 'feh']
-      y, yerr = [], []
-      for var in variables:
-         val = raw_input("{} (value, err): ".format(var))
-         if val == '': continue
-         val = val.split(',')
-         y.append( float(val[0]) )
-         yerr.append( float(val[1]) )
+      # If no setup file is given, run from command line options.
+      #==========================================================
       
-      y, yerr = np.array(y), np.array(yerr)
+      parameters = ['mass_init', 'M_H_init', 'phase'] 
+      limits = [args.mass_lim, args.mh_lim, args.phase_lim]
       
+      #-- parse the observables
+      if len(variables) > 0 and len(variables)%3 == 0:
+         variables = np.reshape(variables, (-1, 3))
+         y = np.array(variables[:,1], dtype=float)
+         yerr = np.array(variables[:,2], dtype=float)
+         variables = np.array(variables[:,0], dtype='a10')
+         
+      elif len(variables) > 0:
+         print "Could not understand observables!"
+         sys.exit()
+      
+      else:
+         print "No observables given!"
+         sys.exit()
+      
+      model = args.model
+      
+      mcmc_kws = dict(nwalkers=args.nwalkers,
+                      nsteps=args.nsteps,
+                      a=args.a)
+      
+   
+   #-- set the parameters
+   models.parameters = parameters
       
    #-- check if variables need to be converted to log(variable)
    for par in ['L', 'R', 'Teff', 'g']:
@@ -66,29 +140,32 @@ if __name__=="__main__":
          yerr[i] = 0.434 * yerr[i] / y[i]
          y[i] = np.log10(y[i])
    
-   print "Stellar evolution models: ", args.model, "\n"
+   #-- print the setup
+   print "Stellar evolution models: ", model, "\n"
    
-   # parse the limits
-   limits = [args.mass_lim, args.mh_lim, args.age_lim]
+   
    print "Limits applied to the model grid parameters:"
-   for p, l in zip(models.parameters, limits):
+   for p, l in zip(parameters, limits):
       print "   {} = {} -> {}".format(p, l[0], l[1])
    print ""
+   
    
    print "Observables included in fit:"
    for v, y_, e_ in zip(variables, y, yerr):
       print "   {} = {} +- {}".format(v, y_, e_)
    print ""
    
+   
    print "MCMC setup:"
-   print "   # walkers:", args.nwalkers
-   print "   # steps:", args.nsteps, "\n"
+   print "   # walkers:", mcmc_kws['nwalkers']
+   print "   # steps:", mcmc_kws['nsteps']
+   print "   # a:", mcmc_kws['a']
    
    
    print "================================================================================"
    
    results, samples = mcmc.MCMC(variables, limits, y, yerr, return_chain=True,
-                  model=args.model, nwalkers=args.nwalkers, nsteps=args.nsteps)
+                  model=model, **mcmc_kws)
    
    print "================================================================================"
    print ""

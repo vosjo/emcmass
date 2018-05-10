@@ -9,7 +9,7 @@ import pyfits
 import interpol
 
 defaults = None
-parameters = ['Mass_init', 'M_H_init', 'phase']
+parameters = ['mass_init', 'M_H_init', 'phase']
 
 basedir = os.path.dirname(__file__)
 
@@ -132,7 +132,7 @@ def interpolate(mass, feh, phase, **kwargs):
    if not hasattr(mass, '__iter__') or not hasattr(phase, '__iter__') or \
       not hasattr(feh, '__iter__'):
       mass = np.array(mass)
-      phase = np.array(age)
+      phase = np.array(phase)
       feh = np.array(feh)
       multiple = True
    

@@ -104,7 +104,7 @@ def lnprob(theta, y, yerr, limits, **kwargs):
 #{ MCMC stuff
 
 def MCMC(variables, limits, obs, obs_err, 
-         model='mist', nwalkers=100, nsteps=1000, percentiles=[16, 50, 84], 
+         model='mist', nwalkers=100, nsteps=1000, a=2, percentiles=[16, 50, 84], 
          return_chain=False, **kwargs):
    """
    Main MCMC function
@@ -126,6 +126,8 @@ def MCMC(variables, limits, obs, obs_err,
    :type nwalkers: int
    :param nsteps: number of steps each walker will take
    :type nsteps: int
+   :param a: scaling factor for the step size (default = 2)
+   :type a: int
    :param percentiles: the percentiles used to calculate the final values and uncertainties
                        used as argument for np.percentile()
    :type percentiles: list
@@ -170,7 +172,7 @@ def MCMC(variables, limits, obs, obs_err,
 
    #-- setup the sampler
    ndim = len(models.parameters)
-   sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(obs, obs_err, limits))
+   sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, a=a, args=(obs, obs_err, limits))
    
    #-- run the sampler
    sampler.run_mcmc(pos, nsteps)

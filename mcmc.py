@@ -1,5 +1,6 @@
 
 import numpy as np
+from numpy.lib.recfunctions import merge_arrays
 
 import emcee
 
@@ -39,11 +40,14 @@ def lnlike(theta, y, yerr, **kwargs):
    # synthetic parameters
    y_syn = models.interpolate(*theta)
    
+   blobs = y_syn
+   y_syn = y_syn[:y.shape[0]]
+   
    # chi squared between model and observations
    chi2 = np.sum((y_syn - y)**2 / yerr**2)
    
    # log of the probability from the chi2
-   return -chi2/2.
+   return -chi2/2., blobs
 
 
 def lnprior(theta, limits, **kwargs):
@@ -91,13 +95,13 @@ def lnprob(theta, y, yerr, limits, **kwargs):
    """
    lp = lnprior(theta, limits)
    if not np.isfinite(lp):
-      return -np.inf
+      return -np.inf, np.array([])
    
-   ll = lnlike(theta, y, yerr)
+   ll, blobs = lnlike(theta, y, yerr)
    if not np.isfinite(ll):
-      return -np.inf
+      return -np.inf, -np.inf, np.array([])
    
-   return lp + ll
+   return lp + ll, blobs
 
 #}
 
@@ -147,7 +151,7 @@ def MCMC(variables, limits, obs, obs_err,
       grid = kwargs.pop('grid')
    else:
       grid = models.prepare_grid(evolution_model=model, variables=variables,
-                              set_default=True, **lim_kwargs)
+                              set_default=True, return_all_variables=True, **lim_kwargs)
       
    #-- set this grid as the default one
    models.defaults=grid
@@ -169,26 +173,68 @@ def MCMC(variables, limits, obs, obs_err,
       a1, a2 = limits[i]
       pos[i] = np.log10(np.random.uniform(10**a1, 10**a2, nwalkers))
    pos = np.array(pos).T
-
+   
+   
    #-- setup the sampler
    ndim = len(models.parameters)
    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, a=a, args=(obs, obs_err, limits))
    
+   #-- burn in (let walkers relax before starting to store results)
+   print "\nBurn In..."
+   for i, result in enumerate(sampler.sample(pos, iterations=50, storechain=False)):
+      if (i+1) % 100 == 0:
+         print("{0:5.1%}".format(float(i) / nrelax))
+   pos = result[0]
+   
+   
    #-- run the sampler
+   print "\nRun..."
    sampler.run_mcmc(pos, nsteps)
 
-   #-- remove first 50 steps and combine the results from the individual walkers
-   samples = sampler.chain[:, 50:, :].reshape((-1, ndim))
-      
+   #-- combine the results from the individual walkers
+   samples = sampler.chain.reshape((-1, ndim))
+   blobs = np.array(sampler.blobs)
+   blobs = blobs.reshape(blobs.shape[0]*blobs.shape[1], blobs.shape[2])
+   probabilities = sampler.flatlnprobability
    
-   #-- calculate the values and uncertainties based on the 16th, 50th, and 84th percentiles
-   #   or whatever percentiles are given by the user
-   pc  = np.percentile(samples, percentiles, axis=0)
-   results = [(v, e1, e2) for v, e1, e2 in zip(pc[1], pc[1]-pc[0], pc[2]-pc[1])]
+   print blobs
    
-   if return_chain:
-      return results, samples
+   #-- clear the samples to save memory
+   sampler.reset()
    
-   return results
+   #-- remove all steps that are not accepted (lnprob == -inf)
+   accept = np.where(np.isfinite(probabilities))
+   samples = samples[accept]
+   blobs = blobs[accept]
+   probabilities = probabilities[accept]
+   
+   #-- convert to recarrays
+   dtypes = [(n, 'f8') for n in models.parameters]
+   samples = np.array([tuple(s) for s in samples], dtype=dtypes)
+   
+   dtypes = [(n, 'f8') for n in grid[2]]
+   print dtypes
+   blobs = np.array([tuple(s) for s in blobs], dtype=dtypes)
+   
+   #-- merge all results in 1 recarray and select best model
+   data = merge_arrays((samples, blobs), asrecarray=True, flatten=True)
+   best = np.where(probabilities == np.max(probabilities))
+   
+   results = {}
+   for n, v in zip(data.dtype.names, data[best][0]):
+      results[n] = v
+   
+   #print blobs
+   #print blobs.shape
+   
+   ##-- calculate the values and uncertainties based on the 16th, 50th, and 84th percentiles
+   ##   or whatever percentiles are given by the user
+   #pc  = np.percentile(samples, percentiles, axis=0)
+   #results = [(v, e1, e2) for v, e1, e2 in zip(pc[1], pc[1]-pc[0], pc[2]-pc[1])]
+   
+   #if return_chain:
+      #return results, samples
+   
+   return results, data
 
 #}

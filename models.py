@@ -51,6 +51,7 @@ def prepare_grid(evolution_model='mist',
                  variables=['log_L', 'log_Teff', 'log_g', 'M_H'],
                  parameters=['mass_init', 'M_H_init', 'phase'],
                  set_default=False, 
+                 return_all_variables=False,
                  **kwargs):
    """
    Prepares the stellar evolution models by creating a pixelgrid to be used in interpolate
@@ -69,6 +70,16 @@ def prepare_grid(evolution_model='mist',
    grid_vars = []
    
    fehlim = kwargs.pop('M_H_lim', (-np.inf, np.inf))
+   
+   #-- get list of all availabel variables but remove the parameters
+   #   and make sure that the variables are the first in the list
+   all_variables = pyfits.getdata(files[0]).dtype.names
+   remove = np.hstack([parameters, variables])
+   all_variables = np.delete(all_variables, np.where(np.in1d(all_variables, remove)))
+   
+   if return_all_variables:
+      variables = np.hstack([variables, all_variables])
+   
    
    for filename, z in zip(files, fehs):
       

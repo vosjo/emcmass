@@ -163,15 +163,14 @@ if __name__=="__main__":
    
    
    print "================================================================================"
-   
    results, samples = mcmc.MCMC(variables, limits, y, yerr, return_chain=True,
                   model=model, **mcmc_kws)
    
    print "================================================================================"
    print ""
    print "Resulting parameters values and errors:"
-   for p, r in zip(models.parameters, results):
-      print "   {} = {:0.3f} -{:0.3f} +{:0.3f}".format(p, r[0], r[1], r[2])
+   for p, r in results.items():
+      print "   {} = {:0.3f} ".format(p, r)
    
    
    # create plot of the results if the corner package exists
@@ -195,12 +194,15 @@ if __name__=="__main__":
    'figure.dpi': 100
    }
    pl.rcParams.update(params)
+   
+   pars = []
+   for p in ['mass_init', 'M_H_init', 'phase', 'age']:
+      if p in samples.dtype.names: pars.append(p)
+      
+   data = samples[pars]
 
-   fig = corner.corner(samples, 
-                     labels=[r"Mass ($\boldsymbol{ M_{\odot} }$)", 
-                             "[Fe/H] (dex)",
-                             r"$\boldsymbol{ \log({\rm age}) }$ (yr)", 
-                             ],
+   fig = corner.corner(data.view(np.float64).reshape(data.shape + (-1,)), 
+                     #labels=data.dtype.names,
                      quantiles=[0.16, 0.5, 0.84],
                      show_titles=True, title_kwargs={"fontsize": 12})
 

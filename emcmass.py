@@ -199,7 +199,16 @@ if __name__=="__main__":
                      quantiles=setup[pindex].get('quantiles', [0.025, 0.16, 0.5, 0.84, 0.975]),
                      levels=setup[pindex].get('levels', [0.393, 0.865, 0.95]),
                      show_titles=True, title_kwargs={"fontsize": 12})
-   
+      
+      
+      if setup[pindex]['type'] == 'HR':
+         
+         pl.figure(i)
+         plotting.plot_HR(variables, y, yerr, results)
+         
+         if not setup[pindex].get('path', None) is None:
+            pl.savefig(setup[pindex].get('path', 'sed_fit.png'))
+      
    #params = {'backend': 'pdf',
    #'ps.usedistiller': 'xpdf',
    #'font.family': 'cm',

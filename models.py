@@ -119,7 +119,7 @@ def prepare_grid(evolution_model='mist',
    if set_default:
       #-- store the prepared pixel grid to be used by interpolation functions
       global defaults
-      defaults = (axis_values, pixelgrid, parameters, variables)
+      defaults = (axis_values, pixelgrid, variables)
    
    return axis_values, pixelgrid, variables
          
@@ -157,7 +157,7 @@ def interpolate(mass, feh, phase, **kwargs):
    #-- convert values to a recarray if that is requested
    if kwargs.get('as_recarray', False):
       dtypes = [(name, 'f8') for name in variables]
-      values = np.array(values, dtype=dtypes)
+      values = np.array([tuple(v) for v in values.T], dtype=dtypes)
       
    return values
 
@@ -213,13 +213,13 @@ def get_track(mass, feh, **kwargs):
       phase = kwargs.pop('phase')
       
    if 'grid' in kwargs:
-      axis_values, pixelgrid = kwargs['grid']
+      axis_values, pixelgrid, variables = kwargs['grid']
    elif not defaults is None:
-      axis_values, pixelgrid = defaults
-      kwargs['grid'] = (axis_values, pixelgrid)
+      axis_values, pixelgrid, variables = defaults
+      kwargs['grid'] = (axis_values, pixelgrid, variables)
    else:
-      axis_values, pixelgrid = prepare_grid(**kwargs)
-      kwargs['grid'] = (axis_values, pixelgrid)
+      axis_values, pixelgrid, variables = prepare_grid(**kwargs)
+      kwargs['grid'] = (axis_values, pixelgrid, variables)
    
    phase = sorted(set(axis_values[2])) if phase is None else phase
    

@@ -1,18 +1,16 @@
- 
+import sys
+import argparse
 
+import pylab as pl
 import numpy as np
 
 import emcee
 
-import models
+import models, mcmc
 
 import mcmc
 
 if __name__=="__main__":
-   
-   import sys
-   import argparse
-   import pylab as pl
    
    parser = argparse.ArgumentParser()
    parser.add_argument("-model", type=str, dest='model', default='mist',
@@ -25,7 +23,7 @@ if __name__=="__main__":
                        help="limit the search in mass")
    parser.add_argument("-M_H", type=float, dest='mh_lim', nargs=2, default=(-1.5, 0.5),
                        help="limit the search in [M/H]")
-   parser.add_argument("-age", type=float, dest='age_lim', nargs=2, default=(0.0, 4.0),
+   parser.add_argument("-age", type=float, dest='age_lim', nargs=2, default=(0, 400),
                        help="limit the search in log(Age)")
    args, variables = parser.parse_known_args()
    

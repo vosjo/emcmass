@@ -43,7 +43,7 @@ def lnlike(theta, y, yerr, **kwargs):
    chi2 = np.sum((y_syn - y)**2 / yerr**2)
    
    # log of the probability from the chi2
-   return np.log( np.exp(-chi2/2.) )
+   return -chi2/2.
 
 
 def lnprior(theta, limits, **kwargs):

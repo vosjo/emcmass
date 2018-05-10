@@ -49,6 +49,7 @@ def get_files(evolution_model):
 
 def prepare_grid(evolution_model='mist',
                  variables=['log_L', 'log_Teff', 'log_g', 'M_H'],
+                 parameters=['mass_init', 'M_H_init', 'phase'],
                  set_default=False, 
                  **kwargs):
    """
@@ -107,74 +108,80 @@ def prepare_grid(evolution_model='mist',
    if set_default:
       #-- store the prepared pixel grid to be used by interpolation functions
       global defaults
-      defaults = (axis_values, pixelgrid)
+      defaults = (axis_values, pixelgrid, parameters, variables)
    
-   return axis_values, pixelgrid
+   return axis_values, pixelgrid, variables
          
 
-def interpolate(mass, feh, age, **kwargs):
+def interpolate(mass, feh, phase, **kwargs):
    """
    Returns the requested values from the stellar evolution grids at the given 
-   values for the input parameters (mass, feh, age)
+   values for the input parameters (mass, feh, phase)
+   
    """
    
    global defaults
    if 'grid' in kwargs:
-      axis_values, pixelgrid = kwargs['grid']
+      axis_values, pixelgrid, variables = kwargs['grid']
    elif not defaults is None:
-      axis_values, pixelgrid = defaults
+      axis_values, pixelgrid, variables = defaults
    else:
-      axis_values, pixelgrid = prepare_grid(**kwargs)
+      axis_values, pixelgrid, variables = prepare_grid(**kwargs)
    
    multiple = False
-   if not hasattr(mass, '__iter__') or not hasattr(age, '__iter__') or \
+   if not hasattr(mass, '__iter__') or not hasattr(phase, '__iter__') or \
       not hasattr(feh, '__iter__'):
       mass = np.array(mass)
-      age = np.array(age)
+      phase = np.array(age)
       feh = np.array(feh)
       multiple = True
    
-   p = np.vstack([mass, feh, age])
+   p = np.vstack([mass, feh, phase])
    
    values = interpol.interpolate(p, axis_values, pixelgrid)
    
    if multiple:
       values = values.flatten()
+   
+   #-- convert values to a recarray if that is requested
+   if kwargs.get('as_recarray', False):
+      dtypes = [(name, 'f8') for name in variables]
+      values = np.array(values, dtype=dtypes)
       
    return values
 
-def get_isochrone(feh, age, **kwargs):
-   """
-   returns an isochrone for the requested metalicity and age
-   The mass points of the track are the gridpoints included in the evolution grid
-   """
+#def get_isochrone(feh, age, **kwargs):
+   #"""
+   #returns an isochrone for the requested metalicity and age
+   #The mass points of the track are the gridpoints included in the evolution grid
+   #"""
    
-   #-- get the mass values
-   #   if mass values are provided in kwargs it is easy, otherwise we need to get
-   #   the axis_values from the prepared pixel grid, which can be provided in the
-   #   grid keyword, in the defaults of the module, or in the last case needs to 
-   #   be calculated.
-   #   if the grid needs to be prepared, we store it and provide it in the grid 
-   #   kwarg to the interpolate function
-   global defaults
-   mass = None
-   if 'mass' in kwargs:
-      mass = kwargs.pop('mass')
-   elif 'grid' in kwargs:
-      axis_values, pixelgrid = kwargs['grid']
-   elif not defaults is None:
-      axis_values, pixelgrid = defaults
-      kwargs['grid'] = (axis_values, pixelgrid)
-   else:
-      axis_values, pixelgrid = prepare_grid(**kwargs)
-      kwargs['grid'] = (axis_values, pixelgrid)
+   ##-- get the mass values
+   ##   if mass values are provided in kwargs it is easy, otherwise we need to get
+   ##   the axis_values from the prepared pixel grid, which can be provided in the
+   ##   grid keyword, in the defaults of the module, or in the last case needs to 
+   ##   be calculated.
+   ##   if the grid needs to be prepared, we store it and provide it in the grid 
+   ##   kwarg to the interpolate function
+   #global defaults
+   #mass = None
+   #if 'mass' in kwargs:
+      #mass = kwargs.pop('mass')
+   #elif 'grid' in kwargs:
+      #axis_values, pixelgrid = kwargs['grid']
+   #elif not defaults is None:
+      #axis_values, pixelgrid = defaults
+      #kwargs['grid'] = (axis_values, pixelgrid)
+   #else:
+      #axis_values, pixelgrid = prepare_grid(**kwargs)
+      #kwargs['grid'] = (axis_values, pixelgrid)
    
-   mass = sorted(set(axis_values[0])) if mass is None else mass
+   #mass = sorted(set(axis_values[0])) if mass is None else mass
    
-   age = np.ones_like(mass) * age
-   feh = np.ones_like(mass) * feh
+   #age = np.ones_like(mass) * age
+   #feh = np.ones_like(mass) * feh
    
-   return interpolate(mass, feh, age, **kwargs)
+   #return interpolate(mass, feh, age, **kwargs)
 
 def get_track(mass, feh, **kwargs):
    """
@@ -190,10 +197,11 @@ def get_track(mass, feh, **kwargs):
    #   if the grid needs to be prepared, we store it and provide it in the grid 
    #   kwarg to the interpolate function
    global defaults
-   age = None
-   if 'age' in kwargs:
-      age = kwargs.pop('age')
-   elif 'grid' in kwargs:
+   phase = None
+   if 'phase' in kwargs:
+      phase = kwargs.pop('phase')
+      
+   if 'grid' in kwargs:
       axis_values, pixelgrid = kwargs['grid']
    elif not defaults is None:
       axis_values, pixelgrid = defaults
@@ -202,12 +210,12 @@ def get_track(mass, feh, **kwargs):
       axis_values, pixelgrid = prepare_grid(**kwargs)
       kwargs['grid'] = (axis_values, pixelgrid)
    
-   age = sorted(set(axis_values[2])) if age is None else age
+   phase = sorted(set(axis_values[2])) if phase is None else phase
    
-   mass = np.ones_like(age) * mass
-   feh = np.ones_like(age) * feh
+   mass = np.ones_like(phase) * mass
+   feh = np.ones_like(phase) * feh
    
-   return interpolate(mass, feh, age, **kwargs)
+   return interpolate(mass, feh, phase, **kwargs)
 
 if __name__=="__main__":
 

@@ -191,8 +191,24 @@ if __name__=="__main__":
    except Exception, e:
       sys.exit()
    
-   #-- Plotting 
+   if not 'setup' in globals(): 
+      
+      pars = []
+      for p in ['mass_init', 'M_H_init', 'phase']:
+         if p in samples.dtype.names: pars.append(p)
+         
+      data = samples[pars]
+
+      fig = corner.corner(data.view(np.float64).reshape(data.shape + (-1,)), 
+                  labels=[plotting.get_label(p) for p in data.dtype.names],
+                  quantiles=[0.025, 0.16, 0.5, 0.84, 0.975],
+                  levels=[0.393, 0.865, 0.95],
+                  show_titles=True, title_kwargs={"fontsize": 12})
+      
+      pl.show()
+      sys.exit()
    
+   #-- Plotting 
    for i in range(10):
       
       pindex = 'plot'+str(i)
@@ -217,6 +233,15 @@ if __name__=="__main__":
          
          pl.figure(i)
          plotting.plot_HR(variables, y, yerr, results)
+         
+         if not setup[pindex].get('path', None) is None:
+            pl.savefig(setup[pindex].get('path', 'sed_HR.png'))
+            
+      if setup[pindex]['type'] == 'fit':
+         
+         pl.figure(i, figsize=(10, 6))
+         pl.subplots_adjust(wspace=0.40, left=0.07, right=0.98)
+         plotting.plot_fit(variables, y, yerr, samples, results)
          
          if not setup[pindex].get('path', None) is None:
             pl.savefig(setup[pindex].get('path', 'sed_fit.png'))

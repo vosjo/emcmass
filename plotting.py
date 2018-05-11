@@ -1,6 +1,7 @@
  
 import numpy as np
 import pylab as pl
+import matplotlib.patches as patches
 
 import models
 
@@ -19,9 +20,51 @@ def get_label(par):
       return par
    
    
-def plot_fit():
+def plot_fit(variables, y, yerr, samples, results):
    
-   pass
+   obs = {}
+   for v, y_, e_ in zip(variables, y, yerr):
+      obs[v] = [y_, e_]
+      
+   pars = list(models.defaults[2])
+   pars.remove('age')
+   
+   
+   
+   for i, par in enumerate(pars):
+   
+      ax = pl.subplot(1, len(pars), i+1)
+      
+      pc = np.percentile(samples[par], [0.2, 16, 50, 84, 99.8])
+      
+      #-- plot 1 sigma range as box
+      ax.add_patch(
+         patches.Rectangle(
+            (0.5, pc[1]),
+            1.0,
+            pc[3]-pc[1],
+            fill=False 
+         )
+      )
+         
+      #-- plot best fit and 50 percentile fit
+      pl.plot([0.5,1.5], [results[par][0], results[par][0]], '--r', lw=1.5)
+      pl.plot([0.5,1.5], [results[par][1], results[par][1]], '-b', lw=1.5)
+      
+      #-- plot 3 sigma range as wiskers
+      pl.plot([1.0, 1.0], [pc[0], pc[1]], '-k', lw=1.5, zorder=0)
+      pl.plot([1.0, 1.0], [pc[3], pc[4]], '-k', lw=1.5, zorder=0)
+      
+      #pl.boxplot(samples[par], usermedians=usermedians)
+      
+      if par in obs:
+         pl.errorbar([1], obs[par][0], yerr=obs[par][1], color='r', marker='x', mew=2, lw=2)
+      
+      ax.axes.get_xaxis().set_visible(False)
+      
+      pl.title(par)
+   
+   
 
 def plot_HR(variables, y, yerr, results):
    

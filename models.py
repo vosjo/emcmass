@@ -50,7 +50,7 @@ def get_files(evolution_model):
 def prepare_grid(evolution_model='mist',
                  variables=['log_L', 'log_Teff', 'log_g', 'M_H'],
                  parameters=['mass_init', 'M_H_init', 'phase'],
-                 set_default=False, 
+                 set_default=True, 
                  return_all_variables=False,
                  **kwargs):
    """

@@ -95,11 +95,11 @@ def lnprob(theta, y, yerr, limits, **kwargs):
    """
    lp = lnprior(theta, limits)
    if not np.isfinite(lp):
-      return -np.inf, np.array([])
+      return -np.inf, np.zeros(len(models.defaults[2]))
    
    ll, blobs = lnlike(theta, y, yerr)
    if not np.isfinite(ll):
-      return -np.inf, -np.inf, np.array([])
+      return -np.inf, np.zeros(len(models.defaults[2]))
    
    return lp + ll, blobs
 
@@ -233,5 +233,15 @@ def MCMC(variables, limits, obs, obs_err,
       #return results, samples
    
    return results, data
+
+def calculate_percentiles(samples, percentiles):
+   
+   pc  = np.percentile(samples.view(np.float64).reshape(samples.shape + (-1,)), percentiles, axis=0)
+   
+   results = {}
+   for p, v, e1, e2 in zip(samples.dtype.names, pc[1], pc[1]-pc[0], pc[2]-pc[1]):
+      results[p] = [v, e1, e2]
+      
+   return results
 
 #}

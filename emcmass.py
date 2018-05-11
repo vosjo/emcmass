@@ -32,6 +32,8 @@ nwalkers: 100    # total number of walkers
 nsteps: 2000     # steps taken by each walker (not including burn-in)
 nrelax: 500      # burn-in steps taken by each walker
 a: 10            # relative size of the steps taken
+# set the percentiles for the error determination 
+percentiles: [16, 50, 84] # 16 - 84 corresponds to 1 sigma
 # output options
 datafile: none   # filepath to write results of all walkers
 plot1:
@@ -99,7 +101,9 @@ if __name__=="__main__":
       mcmc_kws = dict(nwalkers=setup.get('nwalkers', 100),
                       nsteps=setup.get('nsteps', 1000),
                       a=setup.get('a', 2))
-   
+      
+      percentiles = setup.get('percentiles', [16, 50, 84])
+      
    else:
       # If no setup file is given, run from command line options.
       #==========================================================
@@ -127,7 +131,8 @@ if __name__=="__main__":
       mcmc_kws = dict(nwalkers=args.nwalkers,
                       nsteps=args.nsteps,
                       a=args.a)
-      
+         
+      percentiles = [16, 50, 84]
    
    #-- set the parameters
    models.parameters = parameters
@@ -169,8 +174,15 @@ if __name__=="__main__":
    print "================================================================================"
    print ""
    print "Resulting parameters values and errors:"
-   for p, r in results.items():
-      print "   {} = {:0.3f} ".format(p, r)
+   
+   pc  = np.percentile(samples.view(np.float64).reshape(samples.shape + (-1,)), percentiles, axis=0)
+   for p, v, e1, e2 in zip(samples.dtype.names, pc[1], pc[1]-pc[0], pc[2]-pc[1]):
+      results[p] = [results[p], v, e1, e2]
+   
+   print "   Par          Best    Pc      emin     emax"
+   for p in parameters:
+      print "   {:10s} = {:0.3f}   {:0.3f}   -{:0.3f}   +{:0.3f}".format(p, *results[p])
+      
    
    
    # create plot of the results if the corner package exists

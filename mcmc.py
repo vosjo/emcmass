@@ -197,8 +197,6 @@ def MCMC(variables, limits, obs, obs_err,
    blobs = blobs.reshape(blobs.shape[0]*blobs.shape[1], blobs.shape[2])
    probabilities = sampler.flatlnprobability
    
-   print blobs
-   
    #-- clear the samples to save memory
    sampler.reset()
    
@@ -213,7 +211,6 @@ def MCMC(variables, limits, obs, obs_err,
    samples = np.array([tuple(s) for s in samples], dtype=dtypes)
    
    dtypes = [(n, 'f8') for n in grid[2]]
-   print dtypes
    blobs = np.array([tuple(s) for s in blobs], dtype=dtypes)
    
    #-- merge all results in 1 recarray and select best model

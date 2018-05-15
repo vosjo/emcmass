@@ -67,6 +67,8 @@ if __name__=="__main__":
                        help="limit the search in [M/H]")
    parser.add_argument("-phase", type=float, dest='phase_lim', nargs=2, default=(0, 400),
                        help="limit the search in evolutionary phase")
+   parser.add_argument("--plot", action='store_true', dest='plot', default=False,
+                       help="Will show the default plots when fitting")
    args, variables = parser.parse_known_args()
    
    print "================================================================================"
@@ -191,7 +193,7 @@ if __name__=="__main__":
    except Exception, e:
       sys.exit()
    
-   if not 'setup' in globals(): 
+   if not 'setup' in globals() and args.plot: 
       
       pars = []
       for p in ['mass_init', 'M_H_init', 'phase']:
@@ -204,6 +206,13 @@ if __name__=="__main__":
                   quantiles=[0.025, 0.16, 0.5, 0.84, 0.975],
                   levels=[0.393, 0.865, 0.95],
                   show_titles=True, title_kwargs={"fontsize": 12})
+      
+      pl.figure(2, figsize=(10, 6))
+      pl.subplots_adjust(wspace=0.40, left=0.07, right=0.98)
+      plotting.plot_fit(variables, y, yerr, samples, results)
+      
+      pl.figure(3)
+      plotting.plot_HR(variables, y, yerr, results)
       
       pl.show()
       sys.exit()

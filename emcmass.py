@@ -241,7 +241,8 @@ if __name__=="__main__":
       if setup[pindex]['type'] == 'HR':
          
          pl.figure(i)
-         plotting.plot_HR(variables, y, yerr, results)
+         plotting.plot_HR(variables, y, yerr, results, 
+                          result=setup[pindex].get('result', 'pc'))
          
          if not setup[pindex].get('path', None) is None:
             pl.savefig(setup[pindex].get('path', 'sed_HR.png'))

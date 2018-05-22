@@ -16,8 +16,8 @@ parameters: [mass_init, M_H_init, phase]
 # limits that you want to apply to the parameters (same order as parameters)
 limits:
 - [0.1, 2.0]
-- [-4.0, 0.5]
-- [0, 400]
+- [-1.5, 0.5]
+- [100, 400]
 # Observables name: [value, error]
 observables: 
   Teff: [5740, 50]
@@ -33,19 +33,19 @@ nsteps: 2000     # steps taken by each walker (not including burn-in)
 nrelax: 500      # burn-in steps taken by each walker
 a: 10            # relative size of the steps taken
 # set the percentiles for the error determination 
-percentiles: [16, 50, 84] # 16 - 84 corresponds to 1 sigma
+percentiles: [0.2, 50, 99.8] # 16 - 84 corresponds to 1 sigma
 # output options
 datafile: none   # filepath to write results of all walkers
 plot1:
  type: fit
- path: fit.png
+ path: <objectname>_fit.png
 plot2:
  type: distribution
- path: distribution.png
+ path: <objectname>_distribution.png
  parameters: ['mass', 'phase', 'M_H']
 plot3:
  type: HR
- path: HR.png
+ path: <objectname>_HR.png
 """
 
 
@@ -80,8 +80,14 @@ if __name__=="__main__":
    print ""
    
    if not args.defaultfile is None:
-      ofile = open(args.defaultfile, 'w')
-      ofile.write(default)
+      
+      objectname = args.defaultfile
+      filename = objectname + '.yaml'
+      
+      out = default.replace('<objectname>', objectname)
+      
+      ofile = open(filename, 'w')
+      ofile.write(out)
       ofile.close()
       print "Written default setup file to: " + args.defaultfile
       sys.exit()
@@ -239,16 +245,19 @@ if __name__=="__main__":
                      quantiles=setup[pindex].get('quantiles', [0.025, 0.16, 0.5, 0.84, 0.975]),
                      levels=setup[pindex].get('levels', [0.393, 0.865, 0.95]),
                      show_titles=True, title_kwargs={"fontsize": 12})
-      
+         
+         if not setup[pindex].get('path', None) is None:
+            pl.savefig(setup[pindex].get('path'))
       
       if setup[pindex]['type'] == 'HR':
          
-         pl.figure(i)
+         pl.figure(i, figsize=(6, 10))
+         pl.subplots_adjust(left=0.14, right=0.97, top=0.97, bottom=0.07)
          plotting.plot_HR(variables, y, yerr, results, 
                           result=setup[pindex].get('result', 'pc'))
          
          if not setup[pindex].get('path', None) is None:
-            pl.savefig(setup[pindex].get('path', 'sed_HR.png'))
+            pl.savefig(setup[pindex].get('path'))
             
       if setup[pindex]['type'] == 'fit':
          
@@ -257,7 +266,7 @@ if __name__=="__main__":
          plotting.plot_fit(variables, y, yerr, samples, results)
          
          if not setup[pindex].get('path', None) is None:
-            pl.savefig(setup[pindex].get('path', 'sed_fit.png'))
+            pl.savefig(setup[pindex].get('path'))
       
    #params = {'backend': 'pdf',
    #'ps.usedistiller': 'xpdf',

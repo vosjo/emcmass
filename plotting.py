@@ -71,7 +71,7 @@ def plot_HR(variables, y, yerr, results, result='pc'):
    # use model from 'best' results or 'pc' results
    resi = 0 if result == 'best' else 1
    
-   data = models.get_track(results['mass_init'][resi], results['M_H_init'][resi], as_recarray=True)
+   data, phase = models.get_track(results['mass_init'][resi], results['M_H_init'][resi], as_recarray=True)
    
    obs = {}
    for v, y_, e_ in zip(variables, y, yerr):
@@ -79,10 +79,11 @@ def plot_HR(variables, y, yerr, results, result='pc'):
    
    
    if 'log_Teff' in obs:
-      xlim = [obs['log_Teff'][0]-obs['log_Teff'][1] - 0.01, 
-              obs['log_Teff'][0]+obs['log_Teff'][1] + 0.01]
+      xlim = [obs['log_Teff'][0]-obs['log_Teff'][1] - 0.1, 
+              obs['log_Teff'][0]+obs['log_Teff'][1] + 0.1]
    else:
       xlim = None
+   xlim = None
    
    pl.subplot(311)
    pl.subplots_adjust(hspace=0)

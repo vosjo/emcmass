@@ -71,7 +71,7 @@ def plot_HR(variables, y, yerr, results, result='pc'):
    # use model from 'best' results or 'pc' results
    resi = 0 if result == 'best' else 1
    
-   data, phase = models.get_track(results['mass_init'][resi], results['M_H_init'][resi], as_recarray=True)
+   data = models.get_track(results['mass_init'][resi], results['M_H_init'][resi], as_recarray=True)
    
    obs = {}
    for v, y_, e_ in zip(variables, y, yerr):

@@ -43,6 +43,9 @@ plot2:
  type: distribution
  path: distribution.png
  parameters: ['mass', 'phase', 'M_H']
+plot3:
+ type: HR
+ path: HR.png
 """
 
 

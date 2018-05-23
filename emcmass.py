@@ -23,7 +23,7 @@ observables:
   Teff: [5740, 50]
   L: [1.0, 0.1]
   R: [1.0, 0.1]
-  log_g: [4.5, 0.2]
+  log_g: [4.5, 0.5]
   M_H: [0.0, 0.1]
 # The name of the evolution model to use (mist, yapsi)
 model: mist
@@ -38,14 +38,14 @@ percentiles: [0.2, 50, 99.8] # 16 - 84 corresponds to 1 sigma
 datafile: none   # filepath to write results of all walkers
 plot1:
  type: fit
- path: <objectname>_fit.png
+ path: ./results/<objectname>_fit.png
 plot2:
  type: distribution
- path: <objectname>_distribution.png
- parameters: ['mass', 'phase', 'M_H']
+ path: ./results/<objectname>_distribution.png
+ parameters: ['mass_init', 'phase', 'M_H_init']
 plot3:
  type: HR
- path: <objectname>_HR.png
+ path: ./results/<objectname>_HR.png
 """
 
 
@@ -153,7 +153,7 @@ if __name__=="__main__":
       if par in variables:
          i = np.where(variables == par)
          variables[i] = 'log_'+par
-         yerr[i] = 0.434 * yerr[i] / y[i]
+         yerr[i] = 0.43429 * yerr[i] / y[i]
          y[i] = np.log10(y[i])
    
    #-- print the setup
@@ -195,6 +195,12 @@ if __name__=="__main__":
       print "   {:10s} = {:0.3f}   {:0.3f}   -{:0.3f}   +{:0.3f}".format(p, *results[p])
       
    
+   out = ""
+   for par in ['mass_init', 'M_H_init']:
+      out += "{:0.3f}\t{:0.3f}\t".format(results[par][1], 
+                                         np.average([results[par][2],results[par][3]]))
+   out += "{:0.0f}\t{:0.0f}\t".format(results['phase'][1], np.average([results['phase'][2],results['phase'][3]]))
+   print out
    
    # create plot of the results if the corner package exists
    try:
@@ -220,7 +226,7 @@ if __name__=="__main__":
       pl.subplots_adjust(wspace=0.40, left=0.07, right=0.98)
       plotting.plot_fit(variables, y, yerr, samples, results)
       
-      pl.figure(3)
+      pl.figure(3, figsize=(6, 10))
       plotting.plot_HR(variables, y, yerr, results)
       
       pl.show()

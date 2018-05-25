@@ -231,6 +231,9 @@ if __name__=="__main__":
       
       pl.show()
       sys.exit()
+      
+   elif not 'setup' in globals():
+      sys.exit()
    
    #-- Plotting 
    for i in range(10):
@@ -273,23 +276,6 @@ if __name__=="__main__":
          
          if not setup[pindex].get('path', None) is None:
             pl.savefig(setup[pindex].get('path'))
-      
-   #params = {'backend': 'pdf',
-   #'ps.usedistiller': 'xpdf',
-   #'font.family': 'cm',
-   #'mathtext.fontset': 'cm',
-   #'text.latex.preamble':[r"\usepackage{amsmath}"], # to use \boldsymbol{} in mathtext
-   #'font.size' : 9,
-   #'axes.labelsize': 12,
-   #'legend.fontsize': 9,
-   #'xtick.labelsize': 12,
-   #'ytick.labelsize': 12,
-   #'axes.linewidth': 1.0,
-   #'text.usetex': True,
-   #'figure.dpi': 100
-   #}
-   #pl.rcParams.update(params)
-   
    
 
    pl.show()

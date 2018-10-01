@@ -4,7 +4,8 @@ import numpy as np
 import os
 import re 
 import glob
-import pyfits
+
+from astropy.io import fits
 
 import interpol
 
@@ -73,7 +74,7 @@ def prepare_grid(evolution_model='mist',
    
    #-- get list of all availabel variables but remove the parameters
    #   and make sure that the variables are the first in the list
-   all_variables = pyfits.getdata(files[0]).dtype.names
+   all_variables = fits.getdata(files[0]).dtype.names
    remove = np.hstack([parameters, variables])
    all_variables = np.delete(all_variables, np.where(np.in1d(all_variables, remove)))
    
@@ -86,7 +87,7 @@ def prepare_grid(evolution_model='mist',
       #-- skip the file if it is out of metalicity range
       if z < fehlim[0] or z > fehlim[1]: continue
       
-      data = pyfits.getdata(filename)
+      data = fits.getdata(filename)
       
       keep = np.ones(len(data),bool)
       

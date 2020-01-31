@@ -24,19 +24,19 @@ def get_files(evolution_model):
     - yapsi: Yale Potsdam Stellar Isochrones
    """
    
-   modeldir = os.path.join(basedir, 'Models')
+   modeldir = os.path.join(basedir, '../Models')
    
    if evolution_model == 'mist':
-      filename = 'MIST_vvcrit0.0_feh_*.fits'
+      filename = 'MIST_v1.2_vvcrit0.0_feh_*.fits'
    
    elif evolution_model == 'yapsi':
       filename = 'YaPSI_feh_*.fits'
    
    else:
       # default to MIST if models not recognized
-      filename = 'MIST_vvcrit0.0_feh_*.fits'
+      filename = 'MIST_v1.2_vvcrit0.0_feh_*.fits'
    
-   files = glob.glob(os.path.join(basedir, 'Models', filename))
+   files = glob.glob(os.path.join(basedir, '../Models', filename))
    
    files = sorted(files)
    

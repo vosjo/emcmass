@@ -2,7 +2,7 @@ import numpy as np
 
 import  unittest
 
-from emcmass import models
+from emcmass.emcmass import models
 
 class TestGetFiles(unittest.TestCase):
    
@@ -39,8 +39,8 @@ class TestPrepareGrid(unittest.TestCase):
          lim_kwargs[p+'_lim'] = l
       
       axis_values, pixelgrid = models.prepare_grid(evolution_model=self.evolution_model,
-                                       variables=self.variables,
-                                       set_default=True, **lim_kwargs)
+                                                   variables=self.variables,
+                                                   set_default=True, **lim_kwargs)
       
       self.axis_values = axis_values
       self.pixelgrid = pixelgrid
@@ -71,8 +71,8 @@ class TestInterpolate(unittest.TestCase):
    
    def test_grid_point(self):
       
-      values = models.interpolate(1.0, -0.25, 5.5, 
-                                  evolution_model = self.evolution_model, 
+      values = models.interpolate(1.0, -0.25, 5.5,
+                                  evolution_model = self.evolution_model,
                                   variables=self.variables)
       
       expected = [0.71038623, 3.66646819, 3.34812825, -0.2593401]
@@ -83,9 +83,9 @@ class TestInterpolate(unittest.TestCase):
          
    def test_non_grid_point(self):
       
-      values = models.interpolate(1.23, -0.125, 5.342, 
-                                 evolution_model = self.evolution_model, 
-                                 variables=self.variables)
+      values = models.interpolate(1.23, -0.125, 5.342,
+                                  evolution_model = self.evolution_model,
+                                  variables=self.variables)
       
       expected = [0.9616026, 3.66988543, 3.2004471, -0.12966358]
       
@@ -103,7 +103,7 @@ class TestGetIsochrone(unittest.TestCase):
    def test_grid_point(self):
       
       values = models.get_isochrone(-0.25, 6.5,
-                                    evolution_model = self.evolution_model, 
+                                    evolution_model = self.evolution_model,
                                     variables=self.variables)
       
       expected = [-1.47366179, 3.49777507, 3.85755361, -0.259340103]
@@ -119,7 +119,7 @@ class TestGetIsochrone(unittest.TestCase):
    def test_non_grid_point(self):
       
       values = models.get_isochrone(-0.17, 6.536,
-                                    evolution_model = self.evolution_model, 
+                                    evolution_model = self.evolution_model,
                                     variables=self.variables)
       
       expected = [-1.51310257, 3.49048494, 3.86783385, -0.17634713]

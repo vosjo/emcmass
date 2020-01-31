@@ -3,7 +3,8 @@ import numpy as np
 import pylab as pl
 import matplotlib.patches as patches
 
-import models
+from emcmass import models
+
 
 def get_label(par):
    

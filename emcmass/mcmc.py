@@ -4,8 +4,9 @@ from numpy.lib.recfunctions import merge_arrays
 
 import emcee
 
-import models
- 
+from emcmass import models
+
+
 #{ Define the probability funtions
 
 def lnlike(theta, y, yerr, **kwargs):
@@ -108,7 +109,7 @@ def lnprob(theta, y, yerr, limits, **kwargs):
 #{ MCMC stuff
 
 def MCMC(variables, limits, obs, obs_err, 
-         model='mist', nwalkers=100, nsteps=1000, a=2, percentiles=[16, 50, 84], 
+         model='mist', nwalkers=100, nsteps=1000, nrelax=100, a=2, percentiles=[16, 50, 84],
          return_chain=False, **kwargs):
    """
    Main MCMC function
@@ -151,7 +152,7 @@ def MCMC(variables, limits, obs, obs_err,
       grid = kwargs.pop('grid')
    else:
       grid = models.prepare_grid(evolution_model=model, variables=variables,
-                              set_default=True, return_all_variables=True, **lim_kwargs)
+                                 set_default=True, return_all_variables=True, **lim_kwargs)
       
    #-- set this grid as the default one
    models.defaults=grid
@@ -178,24 +179,33 @@ def MCMC(variables, limits, obs, obs_err,
    #-- setup the sampler
    ndim = len(models.parameters)
    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, a=a, args=(obs, obs_err, limits))
-   
-   #-- burn in (let walkers relax before starting to store results)
-   print "\nBurn In..."
-   for i, result in enumerate(sampler.sample(pos, iterations=50, storechain=False)):
-      if (i+1) % 100 == 0:
-         print("{0:5.1%}".format(float(i) / nrelax))
-   pos = result[0]
-   
-   
-   #-- run the sampler
-   print "\nRun..."
-   sampler.run_mcmc(pos, nsteps)
 
-   #-- combine the results from the individual walkers
-   samples = sampler.chain.reshape((-1, ndim))
-   blobs = np.array(sampler.blobs)
-   blobs = blobs.reshape(blobs.shape[0]*blobs.shape[1], blobs.shape[2])
-   probabilities = sampler.flatlnprobability
+   sampler.run_mcmc(pos, nsteps+nrelax, progress=True)
+   
+   # #-- burn in (let walkers relax before starting to store results)
+   # print "\nBurn In..."
+   # for i, result in enumerate(sampler.sample(pos, iterations=50, store=False)):
+   #    if (i+1) % 100 == 0:
+   #       print("{0:5.1%}".format(float(i) / nrelax))
+   # print type(result)
+   # print result
+   # print result['coords']
+   # pos = result[0]
+   #
+   #
+   # #-- run the sampler
+   # print "\nRun..."
+   # sampler.run_mcmc(pos, nsteps)
+
+   samples = sampler.get_chain(discard=nrelax, thin=1, flat=True)
+   blobs = sampler.get_blobs(discard=nrelax, thin=1, flat=True)
+   probabilities = sampler.get_log_prob(discard=nrelax, thin=1, flat=True)
+
+   # #-- combine the results from the individual walkers
+   # samples = sampler.chain.reshape((-1, ndim))
+   # blobs = np.array(sampler.blobs)
+   # blobs = blobs.reshape(blobs.shape[0]*blobs.shape[1], blobs.shape[2])
+   # probabilities = sampler.flatlnprobability
    
    #-- clear the samples to save memory
    sampler.reset()

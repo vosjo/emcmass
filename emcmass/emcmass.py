@@ -5,10 +5,7 @@ import argparse
 import pylab as pl
 import numpy as np
 
-import emcee
-
 import models, mcmc, plotting
-
 
 default = """
 # parameters of the evolution models to fit
@@ -180,7 +177,7 @@ if __name__=="__main__":
    
    print "================================================================================"
    results, samples = mcmc.MCMC(variables, limits, y, yerr, return_chain=True,
-                  model=model, **mcmc_kws)
+                                model=model, **mcmc_kws)
    
    print "================================================================================"
    print ""
@@ -216,11 +213,11 @@ if __name__=="__main__":
          
       data = samples[pars]
 
-      fig = corner.corner(data.view(np.float64).reshape(data.shape + (-1,)), 
-                  labels=[plotting.get_label(p) for p in data.dtype.names],
-                  quantiles=[0.025, 0.16, 0.5, 0.84, 0.975],
-                  levels=[0.393, 0.865, 0.95],
-                  show_titles=True, title_kwargs={"fontsize": 12})
+      fig = corner.corner(data.view(np.float64).reshape(data.shape + (-1,)),
+                          labels=[plotting.get_label(p) for p in data.dtype.names],
+                          quantiles=[0.025, 0.16, 0.5, 0.84, 0.975],
+                          levels=[0.393, 0.865, 0.95],
+                          show_titles=True, title_kwargs={"fontsize": 12})
       
       pl.figure(2, figsize=(10, 6))
       pl.subplots_adjust(wspace=0.40, left=0.07, right=0.98)
@@ -249,11 +246,11 @@ if __name__=="__main__":
             
          data = samples[pars]
 
-         fig = corner.corner(data.view(np.float64).reshape(data.shape + (-1,)), 
-                     labels=[plotting.get_label(p) for p in data.dtype.names],
-                     quantiles=setup[pindex].get('quantiles', [0.025, 0.16, 0.5, 0.84, 0.975]),
-                     levels=setup[pindex].get('levels', [0.393, 0.865, 0.95]),
-                     show_titles=True, title_kwargs={"fontsize": 12})
+         fig = corner.corner(data.view(np.float64).reshape(data.shape + (-1,)),
+                             labels=[plotting.get_label(p) for p in data.dtype.names],
+                             quantiles=setup[pindex].get('quantiles', [0.025, 0.16, 0.5, 0.84, 0.975]),
+                             levels=setup[pindex].get('levels', [0.393, 0.865, 0.95]),
+                             show_titles=True, title_kwargs={"fontsize": 12})
          
          if not setup[pindex].get('path', None) is None:
             pl.savefig(setup[pindex].get('path'))
@@ -262,7 +259,7 @@ if __name__=="__main__":
          
          pl.figure(i, figsize=(6, 10))
          pl.subplots_adjust(left=0.14, right=0.97, top=0.97, bottom=0.07)
-         plotting.plot_HR(variables, y, yerr, results, 
+         plotting.plot_HR(variables, y, yerr, results,
                           result=setup[pindex].get('result', 'pc'))
          
          if not setup[pindex].get('path', None) is None:

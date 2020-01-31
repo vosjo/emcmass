@@ -3,7 +3,7 @@ import numpy as np
 
 import  unittest
 
-from emcmass import models, emcmass
+from emcmass.emcmass import models, emcmass
 
 class TestMCMC(unittest.TestCase):
    

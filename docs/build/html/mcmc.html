@@ -1,0 +1,217 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>MCMC setup &#8212; emcmass 1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Stellar evolution models" href="models.html" />
+    <link rel="prev" title="Welcome to emcmass’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="mcmc-setup">
+<h1>MCMC setup<a class="headerlink" href="#mcmc-setup" title="Permalink to this headline">¶</a></h1>
+<p>The Markov chain Monte Carlo algorithm implemented in the <code class="xref py py-mod docutils literal"><span class="pre">emcee</span></code> package is used. This reduces the effort of implementing MCMC to defining the prior and likelihood functions, and providing some basic setup parameters for emcee.</p>
+<p>The <strong>Seriously Kick-Ass MCMC</strong> <code class="xref py py-mod docutils literal"><span class="pre">emcee</span></code> package is a pure python implementation of the Goodman &amp; Weare’s Affine Invariant Markov chain Monte Carlo (MCMC) Ensemble sampler. The emcee package can be obtained <a class="reference external" href="http://dan.iel.fm/emcee/current/">here</a>, and it is described in <a class="reference external" href="https://arxiv.org/abs/1202.3665">Foreman-Mackey et al. 2012</a>.</p>
+<div class="section" id="parameters-observables">
+<h2>Parameters &amp; Observables<a class="headerlink" href="#parameters-observables" title="Permalink to this headline">¶</a></h2>
+<p>The model parameters (<img class="math" src="_images/math/3be04d4207434584251f6921820c24ac9fa8c6f1.png" alt="\theta"/>) that are used to predict the observations ( <em>y</em> and <em>yerr</em> ) are initial mass, initial metalicity and age (<img class="math" src="_images/math/411ff4caeb9d882107b20b1921240ca4ca561ba6.png" alt="M_i, [M/H]_i, \tau"/>). These parameters are defined as follows:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="35%" />
+<col width="17%" />
+<col width="48%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Parameter</th>
+<th class="head">Name</th>
+<th class="head">Unit</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>initial mass</td>
+<td>Mass_init</td>
+<td><img class="math" src="_images/math/557d46f9934e982101466893e2e57f5349a78af9.png" alt="M_{\odot}"/></td>
+</tr>
+<tr class="row-odd"><td>initial metalicity</td>
+<td>M_H_init</td>
+<td>dex</td>
+</tr>
+<tr class="row-even"><td>age</td>
+<td>log_Age</td>
+<td><img class="math" src="_images/math/6ba705a223bc336941acc4a5245402acff195520.png" alt="\log{ \tau / yr }"/></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>The observable parameters are effective temperature, luminosity, surface gravity, radius and metalicity. The observed metalicity can be different from the initial metalicity due to diffusion and mixing processes during the lifetime of the star. All evolution models shipped with emcmass use the same names and units for the observables, they are defined as follows:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="36%" />
+<col width="17%" />
+<col width="47%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Observable</th>
+<th class="head">Name</th>
+<th class="head">Unit</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>effective temperature</td>
+<td>log_Teff</td>
+<td><img class="math" src="_images/math/700c8603888d25d004d2cf00371694400647baf0.png" alt="\log{T_{eff} / K}"/></td>
+</tr>
+<tr class="row-odd"><td>luminosity</td>
+<td>log_L</td>
+<td><img class="math" src="_images/math/c18302ec35d9f77a717e252272ecb73752972278.png" alt="\log{L / L_{\odot}}"/></td>
+</tr>
+<tr class="row-even"><td>surface gravity</td>
+<td>log_g</td>
+<td><img class="math" src="_images/math/e718f6ade2ece19ba63f63c8b3bd0870ce5b9334.png" alt="\log{g}"/> in cgs</td>
+</tr>
+<tr class="row-odd"><td>radius</td>
+<td>log_R</td>
+<td><img class="math" src="_images/math/2cc1588f595024198dcbffd05a7175c513a2c12a.png" alt="\log{R / R_{\odot}}"/></td>
+</tr>
+<tr class="row-even"><td>metalicity</td>
+<td>M_H</td>
+<td>[M/H]</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</div>
+<div class="section" id="priors">
+<h2>Priors<a class="headerlink" href="#priors" title="Permalink to this headline">¶</a></h2>
+<p>emcmass uses a flat prior for all model parameters (<img class="math" src="_images/math/3be04d4207434584251f6921820c24ac9fa8c6f1.png" alt="\theta"/>). The log-prior function is defined as returning <em>0</em> if all parameters are within their limits and returning <img class="math" src="_images/math/be95284921fb552a0e38ab06bff77d2cc9c46224.png" alt="-\inf"/> if any parameter is outside its limit.</p>
+<p>This prior is defined in the <a class="reference internal" href="emcmass.html#emcmass.emcmass.lnprior" title="emcmass.emcmass.lnprior"><code class="xref py py-func docutils literal"><span class="pre">emcmass.emcmass.lnprior()</span></code></a> function. It takes as arguments the model parameters (<img class="math" src="_images/math/3be04d4207434584251f6921820c24ac9fa8c6f1.png" alt="\theta"/>), and the limits on the parameters as a list of tuples. In the following example the masses are limited between 0.1 and 2.0 Msol, metalicity between -1 and 0.25 and age between 1 Myr and 1 Gyr:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">limits</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">),</span> <span class="p">(</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">9.0</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lnprior</span><span class="p">([</span><span class="mf">0.91</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.125</span><span class="p">,</span> <span class="mf">6.67</span><span class="p">],</span> <span class="n">limits</span><span class="p">)</span>
+<span class="go">    0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lnprior</span><span class="p">([</span><span class="mf">2.31</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.125</span><span class="p">,</span> <span class="mf">6.67</span><span class="p">],</span> <span class="n">limits</span><span class="p">)</span>
+<span class="go">    -inf</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="likelihood-function">
+<h2>Likelihood function<a class="headerlink" href="#likelihood-function" title="Permalink to this headline">¶</a></h2>
+<p>The likelihood of observing observables <em>y</em> for a given model <img class="math" src="_images/math/3be04d4207434584251f6921820c24ac9fa8c6f1.png" alt="\theta"/> is defined as <img class="math" src="_images/math/ee8f577a64d26efaa944b56f95cfd485b941fe84.png" alt="L(y|\theta) = \exp{(-\chi^2/2)}"/>, where the chi squared function is calculated as:</p>
+<div class="math">
+<p><img src="_images/math/9877a846cdf273df35f158d03f104646b6446220.png" alt="\chi^2 = \sum_i \frac{(y_i - m(\theta)_i)^2}{yerr_i^2}"/></p>
+</div><p>where <img class="math" src="_images/math/739c9d2fa8e0a02fe07fe0205d5cef86836be2f5.png" alt="m(\theta)"/> are the theoretical values for the given model parameters <img class="math" src="_images/math/3be04d4207434584251f6921820c24ac9fa8c6f1.png" alt="\theta"/>.</p>
+<p>The likelihood function is defined in the <a class="reference internal" href="emcmass.html#emcmass.emcmass.lnlike" title="emcmass.emcmass.lnlike"><code class="xref py py-func docutils literal"><span class="pre">emcmass.emcmass.lnlike()</span></code></a> function. Its arguments are the model parameters <img class="math" src="_images/math/3be04d4207434584251f6921820c24ac9fa8c6f1.png" alt="\theta"/>, the observables <em>y</em> and the errors on the observables <em>yerr</em>. It will call the <a class="reference internal" href="emcmass.html#emcmass.models.interpolate" title="emcmass.models.interpolate"><code class="xref py py-func docutils literal"><span class="pre">emcmass.models.interpolate()</span></code></a> function to determine the theoretical values for the observables.</p>
+</div>
+<div class="section" id="markov-chain">
+<h2>Markov chain<a class="headerlink" href="#markov-chain" title="Permalink to this headline">¶</a></h2>
+<p>To create the Markov chains with the probability distribution <img class="math" src="_images/math/2d28073cdfb53e9cb1e0f3c09ddc5a50f1f3084c.png" alt="p(\theta|y)"/>, a <em>Metropolis-Hastings</em> jump probability distribution is used. This is also the standard setup in emcee. It is defined as follows. A trial point <img class="math" src="_images/math/14726c9bb2acb8218c9ef6fe1ae82edde172f093.png" alt="\theta' = \theta + \delta \theta"/> in the vicinity of the current model parameters is picked. If any of the model parameters <img class="math" src="_images/math/90b62743efdc3f4d555424814fbeaad5ec65ac9b.png" alt="\theta'"/> are outside the valid range, the point is imediatly rejected. This is achieved by the prior function returning <img class="math" src="_images/math/be95284921fb552a0e38ab06bff77d2cc9c46224.png" alt="-\inf"/> if the model parameters are outside their limits. Otherwise, the probability of accepting the new point is given as:</p>
+<div class="math">
+<p><img src="_images/math/97a46201a811edeaef67dc3ab3ff9e5fc53cc8c2.png" alt="\begin{eqnarray}
+p = &amp; 1 &amp; {\rm if\ \ } L(\theta'|y) &gt; L(\theta|y) \\
+    &amp; L(\theta'|y) / L(\theta|y) &amp; {\rm if\ \ } L(\theta'|y) \le L(\theta|y)
+\end{eqnarray}"/></p>
+</div><p>Meaning that if the likelihood of the new model is higher then the current one it is always accepted, but if it is lower the probability of accepting it depends on the fraction of the likelihoods.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">emcmass</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">MCMC setup</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#parameters-observables">Parameters &amp; Observables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#priors">Priors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#likelihood-function">Likelihood function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#markov-chain">Markov chain</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Stellar evolution models</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to emcmass’s documentation!</a></li>
+      <li>Next: <a href="models.html" title="next chapter">Stellar evolution models</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Joris Vos.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/mcmc.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

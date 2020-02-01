@@ -1,0 +1,459 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>emcmass package &#8212; emcmass 1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="emcmass-package">
+<h1>emcmass package<a class="headerlink" href="#emcmass-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-emcmass.emcmass">
+<span id="emcmass-emcmass-module"></span><h2>emcmass.emcmass module<a class="headerlink" href="#module-emcmass.emcmass" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="emcmass.emcmass.MCMC">
+<code class="descclassname">emcmass.emcmass.</code><code class="descname">MCMC</code><span class="sig-paren">(</span><em>variables, limits, obs, obs_err, model='mist', nwalkers=100, nsteps=1000, percentiles=[16, 50, 84], return_chain=False, **kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#emcmass.emcmass.MCMC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main MCMC function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>parameters</strong> (<em>list</em>) – list of model parameters to interpolate in between</li>
+<li><strong>variables</strong> (<em>list</em>) – list of observable variables to be used in the likelihood function</li>
+<li><strong>limits</strong> (<em>list of tuples</em>) – list of limits on the model parameters. Each limit is one tuple 
+containing (min, max)</li>
+<li><strong>obs</strong> (<em>np.array</em>) – array of the observed values for the variables</li>
+<li><strong>obs_err</strong> (<em>np.array</em>) – array of the errors on the observations</li>
+<li><strong>model</strong> (<em>str</em>) – name of the stellar evolution models</li>
+<li><strong>nwalkers</strong> (<em>int</em>) – number of walkers to use (at least twice as many as parameters)</li>
+<li><strong>nsteps</strong> (<em>int</em>) – number of steps each walker will take</li>
+<li><strong>percentiles</strong> (<em>list</em>) – the percentiles used to calculate the final values and uncertainties
+used as argument for np.percentile()</li>
+<li><strong>return_chain</strong> (<em>bool</em>) – if true, the whole Markov chain is returned, otherwise on the 
+values and errors (lower and upper) for the parameters</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">array (#parameters, #walkers * #steps) – all samples taken by each walker.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="emcmass.emcmass.lnlike">
+<code class="descclassname">emcmass.emcmass.</code><code class="descname">lnlike</code><span class="sig-paren">(</span><em>theta</em>, <em>y</em>, <em>yerr</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#emcmass.emcmass.lnlike" title="Permalink to this definition">¶</a></dt>
+<dd><p>log likelihood function</p>
+<p>There is no need to check for limits in the likelihood function because
+this is already done in the prior function</p>
+<p>This function uses <code class="xref py py-func docutils literal"><span class="pre">models.interpolate()</span></code> to obtain the synthetic
+values for the given parameters theta. The logarithm of the likelihood is
+calculated as:</p>
+<p><img class="math" src="_images/math/ae5fe05f6343a2e167280af8a027ef59f0dee582.png" alt="L( theta | y ) = \exp( - \chi^2 / 2 )"/></p>
+<p>with:</p>
+<p><img class="math" src="_images/math/4dd41d30f08e47e1dbd8a00191a2fe02b74f750e.png" alt="\chi^2 = \sum (model(theta) - y)^2 / yerr^2"/></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>theta</strong> (<em>list</em>) – list of model parameters (normaly mass, fe/h and age)</li>
+<li><strong>y</strong> (<em>array</em>) – 1D array of observables</li>
+<li><strong>yerr</strong> (<em>array</em>) – 1D array containing errors on every observable</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">logarithm of the likelihood of the model parameters (theta) given 
+the observables (y) with errors (yerr)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="emcmass.emcmass.lnprior">
+<code class="descclassname">emcmass.emcmass.</code><code class="descname">lnprior</code><span class="sig-paren">(</span><em>theta</em>, <em>limits</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#emcmass.emcmass.lnprior" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple uniform (flat) prior on all three parameters if they 
+are within their range</p>
+<p>if all parameters are within the provided limits, the the returned 
+log probability is 0, otherwise it is -inf.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>theta</strong> (<em>list</em>) – list of model parameters</li>
+<li><strong>limits</strong> (<em>list of tuples</em>) – limits on the model parameters</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">logarithm of the probability of the parameters (theta) given the 
+model limits</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="emcmass.emcmass.lnprob">
+<code class="descclassname">emcmass.emcmass.</code><code class="descname">lnprob</code><span class="sig-paren">(</span><em>theta</em>, <em>y</em>, <em>yerr</em>, <em>limits</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#emcmass.emcmass.lnprob" title="Permalink to this definition">¶</a></dt>
+<dd><p>full log probability function combining the prior and the likelihood</p>
+<p>will return -inf if any of <a class="reference internal" href="#emcmass.emcmass.lnprior" title="emcmass.emcmass.lnprior"><code class="xref py py-func docutils literal"><span class="pre">lnprior()</span></code></a> or <code class="xref py py-func docutils literal"><span class="pre">lnlikelyhood()</span></code> is 
+infite, otherwise it will return the sum of both functions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>theta</strong> (<em>list</em>) – list of model parameters (normaly mass, fe/h and age)</li>
+<li><strong>y</strong> (<em>array</em>) – 1D array of observables</li>
+<li><strong>yerr</strong> (<em>array</em>) – 1D array containing errors on every observable</li>
+<li><strong>limits</strong> (<em>list of tuples</em>) – limits on the model parameters</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the sum of the log prior and log likelihood</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-emcmass.interpol">
+<span id="emcmass-interpol-module"></span><h2>emcmass.interpol module<a class="headerlink" href="#module-emcmass.interpol" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="emcmass.interpol.create_pixeltypegrid">
+<code class="descclassname">emcmass.interpol.</code><code class="descname">create_pixeltypegrid</code><span class="sig-paren">(</span><em>grid_pars</em>, <em>grid_data</em><span class="sig-paren">)</span><a class="headerlink" href="#emcmass.interpol.create_pixeltypegrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates pixelgrid and arrays of axis values.</p>
+<dl class="docutils">
+<dt>Starting from:</dt>
+<dd><ul class="first last simple">
+<li>grid_pars: 2D numpy array, 1 column per parameter, unlimited number of cols</li>
+<li>grid_data: 2D numpy array, 1 column per variable, data corresponding to the rows in grid_pars</li>
+</ul>
+</dd>
+</dl>
+<p>example: interpolation in a 3D grid containing stellar evolution models. Say we have as
+input parameters mass, age and metalicity, and want to obtain teff and logg as variables.</p>
+<dl class="docutils">
+<dt>grid_pars =</dt>
+<dd><table border="1" class="first last docutils">
+<colgroup>
+<col width="35%" />
+<col width="29%" />
+<col width="35%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>mass</td>
+<td>age</td>
+<td>Fe/H</td>
+</tr>
+<tr class="row-even"><td>1.0</td>
+<td>1.0</td>
+<td>-0.5</td>
+</tr>
+<tr class="row-odd"><td>2.0</td>
+<td>1.0</td>
+<td>-0.5</td>
+</tr>
+<tr class="row-even"><td>1.0</td>
+<td>2.0</td>
+<td>-0.5</td>
+</tr>
+<tr class="row-odd"><td>2.0</td>
+<td>2.0</td>
+<td>-0.5</td>
+</tr>
+<tr class="row-even"><td>1.0</td>
+<td>1.0</td>
+<td>0.0</td>
+</tr>
+<tr class="row-odd"><td>2.0</td>
+<td>1.0</td>
+<td>0.0</td>
+</tr>
+<tr class="row-even"><td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>grid_data = </dt>
+<dd><table border="1" class="first last docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>teff</td>
+<td>logg</td>
+</tr>
+<tr class="row-even"><td>5000</td>
+<td>4.45</td>
+</tr>
+<tr class="row-odd"><td>6000</td>
+<td>4.48</td>
+</tr>
+<tr class="row-even"><td>…</td>
+<td>…</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<p>The resulting grid will be rectangular and complete. This means that every
+combination of unique values in grid_pars should exist. If this is not the
+case, a +inf value will be inserted in grid_data at all locations that are 
+missing!</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>grid_pars</strong> (<em>array</em>) – Npar x Ngrid array of parameters</li>
+<li><strong>grid_data</strong> (<em>array</em>) – Ndata x Ngrid array of data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">axis values and pixelgrid</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array, array</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="emcmass.interpol.interpolate">
+<code class="descclassname">emcmass.interpol.</code><code class="descname">interpolate</code><span class="sig-paren">(</span><em>p</em>, <em>axis_values</em>, <em>pixelgrid</em><span class="sig-paren">)</span><a class="headerlink" href="#emcmass.interpol.interpolate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolates in a grid prepared by create_pixeltypegrid().</p>
+<p>p is an array of parameter arrays
+each collumn contains the value for the corresponding parameter in grid_pars
+each row contains a set of model parameters for wich the interpolated values
+in grid_data are requested.</p>
+<p>example: continue with stellar evolution models used in create_pixeltypegrid</p>
+<dl class="docutils">
+<dt>p = </dt>
+<dd><table border="1" class="first last docutils">
+<colgroup>
+<col width="33%" />
+<col width="28%" />
+<col width="39%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>mass</td>
+<td>age</td>
+<td>Fe/H</td>
+</tr>
+<tr class="row-even"><td>1.21</td>
+<td>1.3</td>
+<td>0.24</td>
+</tr>
+<tr class="row-odd"><td>1.57</td>
+<td>2.4</td>
+<td>-0.15</td>
+</tr>
+<tr class="row-even"><td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.21</span><span class="p">,</span> <span class="mf">1.3</span><span class="p">,</span> <span class="mf">0.24</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.57</span><span class="p">,</span> <span class="mf">2.4</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interpolate</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">axis_values</span><span class="p">,</span> <span class="n">pixelgrid</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">some</span> <span class="n">output</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>p</strong> (<em>array</em>) – Npar x Ninterpolate array containing the points which to
+interpolate in axis_values</li>
+<li><strong>axis_values</strong> (<em>array</em>) – output from create_pixeltypegrid</li>
+<li><strong>pixelgrid</strong> (<em>array</em>) – output from create_pixeltypegrid</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Ndata x Ninterpolate array containing the interpolated values
+in pixelgrid</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-emcmass.models">
+<span id="emcmass-models-module"></span><h2>emcmass.models module<a class="headerlink" href="#module-emcmass.models" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="emcmass.models.get_files">
+<code class="descclassname">emcmass.models.</code><code class="descname">get_files</code><span class="sig-paren">(</span><em>evolution_model</em><span class="sig-paren">)</span><a class="headerlink" href="#emcmass.models.get_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of files belonging to the requested evolution models together
+with a list of the metalicity of each file</p>
+<dl class="docutils">
+<dt>curently recognized models are: </dt>
+<dd><ul class="first last simple">
+<li>mist: MESA Isochrones &amp; Stellar tracks with v/vcrit = 0.0</li>
+<li>yapsi: Yale Potsdam Stellar Isochrones</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="emcmass.models.get_isochrone">
+<code class="descclassname">emcmass.models.</code><code class="descname">get_isochrone</code><span class="sig-paren">(</span><em>feh</em>, <em>age</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#emcmass.models.get_isochrone" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns an isochrone for the requested metalicity and age
+The mass points of the track are the gridpoints included in the evolution grid</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="emcmass.models.get_track">
+<code class="descclassname">emcmass.models.</code><code class="descname">get_track</code><span class="sig-paren">(</span><em>mass</em>, <em>feh</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#emcmass.models.get_track" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an evolution track for a given mass and metalicity. 
+The age points of the track are the gridpoints included in the evolution grid</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="emcmass.models.interpolate">
+<code class="descclassname">emcmass.models.</code><code class="descname">interpolate</code><span class="sig-paren">(</span><em>mass</em>, <em>feh</em>, <em>age</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#emcmass.models.interpolate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the requested values from the stellar evolution grids at the given 
+values for the input parameters (mass, feh, age)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="emcmass.models.prepare_grid">
+<code class="descclassname">emcmass.models.</code><code class="descname">prepare_grid</code><span class="sig-paren">(</span><em>evolution_model='mist', variables=['log_L', 'log_Teff', 'log_g', 'M_H'], set_default=False, **kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#emcmass.models.prepare_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepares the stellar evolution models by creating a pixelgrid to be used in interpolate
+This method will read the stellar evolution models from file, select only 
+the columns you want to interpolate over (given in parameter_names), and will 
+return axis_values, pixelgrid to be used in interpolate.</p>
+<p>You can also provide limits on the size of the grid in mass, feh and age by
+setting the mass_lim, feh_lim and age_lim keywords</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-emcmass">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-emcmass" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">emcmass</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mcmc.html">MCMC setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Stellar evolution models</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Joris Vos.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/emcmass.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

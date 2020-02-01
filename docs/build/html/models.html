@@ -1,0 +1,235 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Stellar evolution models &#8212; emcmass 1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="MCMC setup" href="mcmc.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="stellar-evolution-models">
+<h1>Stellar evolution models<a class="headerlink" href="#stellar-evolution-models" title="Permalink to this headline">¶</a></h1>
+<p>At this moment two types of stellar evolution models are included in emcmass: MIST and YaPSI. to select which one to use you can provided the -model keyword when calling emcmass from the commandline or setting the evolution_model keyword when calling the <a class="reference internal" href="emcmass.html#emcmass.emcmass.MCMC" title="emcmass.emcmass.MCMC"><code class="xref py py-func docutils literal"><span class="pre">emcmass.emcmass.MCMC()</span></code></a> function.</p>
+<p>The stellar evolution models are provided in fits files which all have the same structure. Each fits file containes all model for one initial metalicity. Only the model parameters (initial Mass, initial Metalicity and Age) together with several observable parameters are included in the fits files to save on disk space, and more importantly to increase the speed of the interpolation routines. All models are saved in Table format in fits files with the folowing column names</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="11%" />
+<col width="89%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Mass_init</td>
+<td>the inital mass in <img class="math" src="_images/math/557d46f9934e982101466893e2e57f5349a78af9.png" alt="M_{\odot}"/></td>
+</tr>
+<tr class="row-even"><td>M_H_init</td>
+<td>the initial metalicity [M/H] in dex</td>
+</tr>
+<tr class="row-odd"><td>log_Age</td>
+<td>logarithm of the age: <img class="math" src="_images/math/762d0be935c1d04774ba8940631629046cd404fd.png" alt="\log_{10}({\rm Age / yr})"/></td>
+</tr>
+<tr class="row-even"><td>log_L</td>
+<td>logarithm of the luminosity: <img class="math" src="_images/math/6dcc85ffdcc9f97d7fd2266d71461bc93f24df2c.png" alt="\log_{10}({\rm L / L_{\odot}})"/></td>
+</tr>
+<tr class="row-odd"><td>log_R</td>
+<td>logarithm of the radius: <img class="math" src="_images/math/0785c3c75c5267e52fdec4259bc3a6ea9e942878.png" alt="\log_{10}({\rm R / R_{\odot}})"/></td>
+</tr>
+<tr class="row-even"><td>log_g</td>
+<td>logarithm of the surface gravity in cgi units</td>
+</tr>
+<tr class="row-odd"><td>log_Teff</td>
+<td>logarithm of the effective temperature in K</td>
+</tr>
+<tr class="row-even"><td>M_H</td>
+<td>current surface metalicity [M/H] in dex</td>
+</tr>
+<tr class="row-odd"><td>Mass</td>
+<td>current mass in <img class="math" src="_images/math/557d46f9934e982101466893e2e57f5349a78af9.png" alt="M_{\odot}"/></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="section" id="mist">
+<h2>MIST<a class="headerlink" href="#mist" title="Permalink to this headline">¶</a></h2>
+<p>MESA Isochrones and Stellar Tracks (<a class="reference external" href="http://waps.cfa.harvard.edu/MIST/index.html">MIST</a>) is a large grid of single star stellar evolution models extending across all evolutionary phases for all relevant masses &amp; metallicities calculated with the Modules and Experiments in Stellar Evolution (MESA) code. The MIST models included with emcmass code are calculated with MESA version v7503. A detailed description of these models is given in <a class="reference external" href="http://adsabs.harvard.edu/abs/2016ApJS..222....8D">Dotter A. 2016</a> and <a class="reference external" href="http://adsabs.harvard.edu/abs/2016ApJ...823..102C">Choi J. et al. 2016</a>.</p>
+<div class="section" id="parameter-ranges">
+<h3>Parameter ranges<a class="headerlink" href="#parameter-ranges" title="Permalink to this headline">¶</a></h3>
+<p>The mass range of the original MIST models reaches from 0.10 Msol till 200 Msol. For the purpose of emcmass however only the models with a mass between 0.10 and 10.00 Msol are included, with a progressive step size depending on the mass as:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="75%" />
+<col width="25%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Mass range</th>
+<th class="head">Step</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>0.10 - 0.90</td>
+<td>0.01</td>
+</tr>
+<tr class="row-odd"><td>0.92 - 1.40</td>
+<td>0.02</td>
+</tr>
+<tr class="row-even"><td>1.45 - 2.00</td>
+<td>0.05</td>
+</tr>
+<tr class="row-odd"><td>2.10 - 3.00</td>
+<td>0.10</td>
+</tr>
+<tr class="row-even"><td>3.25 - 10.00</td>
+<td>0.25</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>All models are calculated for metalicities varying between [Fe/H] = -1.00 – 0.50 in steps of 0.25, and lower metalicities [Fe/H] = -4 – -1 are provided in steps of 0.50.</p>
+<p>The models are calculated for ages varying in log(Age/yr) = 5.0 - 10.3, in steps of 0.05. Obviously the heavier models don’t have such long lifetimes. The actually included ages for the included masses are given in the folowing figure:</p>
+<a class="reference internal image-reference" href="_images/MIST_models_mass_age.png"><img alt="_images/MIST_models_mass_age.png" src="_images/MIST_models_mass_age.png" style="width: 60em;" /></a>
+</div>
+</div>
+<div class="section" id="yapsi">
+<h2>YaPSI<a class="headerlink" href="#yapsi" title="Permalink to this headline">¶</a></h2>
+<p>The Yale - Potsdam Stellar Isochrones (<a class="reference external" href="http://www.astro.yale.edu/yapsi/">YaPSI</a>) is an extended set of stellar tracks designed with a denser grid in masses aimed at the precise determination of stellar parameters required in the characterisation of exoplanet hosts. This grid is an improvement of the Yonsei-Yale grid with a special emphasis on the construction of accurate low-mass models (&lt; 0.6 Msol). The isochrones are calculated from the pre main sequence phase untill the tip of the first giant branch (RGB). A detailed description of the YaPSI models is given in <a class="reference external" href="https://arxiv.org/abs/1703.03975">Spada, F. et al.2017</a>.</p>
+<div class="section" id="id3">
+<h3>Parameter ranges<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>The masses of the YaPSI model range from 0.15 till 5.00 Msol, with progressive steps in mass:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="73%" />
+<col width="27%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Mass range</th>
+<th class="head">Step</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>0.10 - 0.40</td>
+<td>0.01</td>
+</tr>
+<tr class="row-odd"><td>0.42 - 0.90</td>
+<td>0.02</td>
+</tr>
+<tr class="row-even"><td>0.95 - 1.80</td>
+<td>0.05</td>
+</tr>
+<tr class="row-odd"><td>1.90 - 3.00</td>
+<td>0.10</td>
+</tr>
+<tr class="row-even"><td>3.00 - 5.00</td>
+<td>0.20</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>All models are calculated with metalicities [Fe/H] = +0.3, 0.0, -0.5, -1.0, -1.5, and varying Helium content Y = 0.25, 0.28, 0.31, 0.34 and 0.38. In emcmass only the models with Y = 0.28 are included.</p>
+<p>Ages vary from the pre-MS till the tip of the RGB, which translates to log(Age/yr) = 4.0 - 10.49. The age distribution is taken as linear in natural logarithm as:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ages</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">e</span><span class="o">**</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)),</span> <span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The dependence of maxiumum age for a given mass is shown below:</p>
+<a class="reference internal image-reference" href="_images/YaPSI_models_mass_age.png"><img alt="_images/YaPSI_models_mass_age.png" src="_images/YaPSI_models_mass_age.png" style="width: 60em;" /></a>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">emcmass</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="mcmc.html">MCMC setup</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Stellar evolution models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#mist">MIST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#yapsi">YaPSI</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="mcmc.html" title="previous chapter">MCMC setup</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Joris Vos.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/models.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

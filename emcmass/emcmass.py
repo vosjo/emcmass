@@ -5,7 +5,7 @@ import argparse
 import pylab as pl
 import numpy as np
 
-import models, mcmc, plotting
+from emcmass import models, mcmc, plotting
 
 default = """
 # parameters of the evolution models to fit
@@ -100,7 +100,7 @@ def main():
         parameters = setup.get('parameters', ['mass_init', 'M_H_init', 'phase'])
         limits = setup.get('limits', None)
 
-        variables = np.array(setup['observables'].keys(), dtype='a10')
+        variables = np.array(list(setup['observables'].keys()), dtype='U10')
         y = np.array([setup['observables'][key][0] for key in variables])
         yerr = np.array([setup['observables'][key][1] for key in variables])
 
@@ -200,8 +200,7 @@ def main():
     except Exception:
         sys.exit()
 
-    if 'setup' not in globals() and args.plot:
-
+    if args.filename is None and args.plot:
         pars = []
         for p in ['mass_init', 'M_H_init', 'phase']:
             if p in samples.dtype.names:
@@ -225,7 +224,7 @@ def main():
         pl.show()
         sys.exit()
 
-    if 'setup' not in globals():
+    if args.filename is None:
         sys.exit()
 
     # -- Plotting

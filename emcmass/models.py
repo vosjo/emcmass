@@ -7,7 +7,7 @@ import glob
 
 from astropy.io import fits
 
-import interpol
+from emcmass import interpol
 
 defaults = None
 parameters = ['mass_init', 'M_H_init', 'phase']
@@ -246,5 +246,5 @@ if __name__=="__main__":
                         #)
    
    
-   print interpolate(1.23, 0.125, 1.5, grid=grid1)
+   print (interpolate(1.23, 0.125, 1.5, grid=grid1))
    #print interpolate(1.23, 0.125, 6.37, grid=grid2)

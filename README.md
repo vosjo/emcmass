@@ -3,5 +3,4 @@
 Determine stellar masses by fitting MIST stellar evolution models to observed 
 atmospheric parameters. Uses the Markov chain Monte Carlo  implemented in EMCEE.
 
-.. image:: https://img.shields.io/badge/license-MIT-blue.svg?style=flat
-    :target: https://github.com/vosjo/emcmass/blob/master/LICENSE
+[![Documentation Status](https://readthedocs.org/projects/emcmass/badge/?version=latest)](https://emcmass.readthedocs.io/en/latest/?badge=latest)

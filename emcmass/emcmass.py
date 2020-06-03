@@ -5,6 +5,8 @@ import argparse
 import pylab as pl
 import numpy as np
 
+from numpy.lib.recfunctions import repack_fields
+
 from emcmass import models, mcmc, plotting
 
 default = """
@@ -241,10 +243,11 @@ def main():
                 if p in samples.dtype.names:
                     pars.append(p)
 
-            data = samples[pars]
+            data = repack_fields(samples[pars])
 
+            labels = [plotting.get_label(p) for p in data.dtype.names]
             fig = corner.corner(data.view(np.float64).reshape(data.shape + (-1,)),
-                                labels=[plotting.get_label(p) for p in data.dtype.names],
+                                labels=labels,
                                 quantiles=setup[pindex].get('quantiles', [0.025, 0.16, 0.5, 0.84, 0.975]),
                                 levels=setup[pindex].get('levels', [0.393, 0.865, 0.95]),
                                 show_titles=True, title_kwargs={"fontsize": 12})

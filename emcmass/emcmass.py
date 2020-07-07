@@ -81,14 +81,18 @@ def main():
     if args.defaultfile is not None:
 
         objectname = args.defaultfile
-        filename = objectname + '.yaml'
+        if not objectname.endswith('.yaml'):
+            filename = objectname + '.yaml'
+        else:
+            filename = objectname
+            objectname = objectname.replace('.yaml', '')
 
         out = default.replace('<objectname>', objectname)
 
         ofile = open(filename, 'w')
         ofile.write(out)
         ofile.close()
-        print("Written default setup file to: " + args.defaultfile)
+        print("Written default setup file to: " + filename)
         sys.exit()
 
     if args.filename is not None:

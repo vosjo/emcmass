@@ -194,7 +194,6 @@ def main():
         out += "{:0.3f}\t{:0.3f}\t".format(results[par][1],
                                            np.average([results[par][2], results[par][3]]))
     out += "{:0.0f}\t{:0.0f}\t".format(results['phase'][1], np.average([results['phase'][2], results['phase'][3]]))
-    print(out)
 
     # create plot of the results if the corner package exists
     try:

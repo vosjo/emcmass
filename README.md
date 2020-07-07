@@ -132,12 +132,12 @@ in the plot part of the input file. The three possible figures are:
 
 1) The 'fit' image:
 
-![example fit image](https://raw.githubusercontent.com/vosjo/emcmass/master/docs/docs/source/images/example_fit.png)
+![example fit image](https://raw.githubusercontent.com/vosjo/emcmass/master/docs/source/images/example_fit.png)
 
 2) The distribution of the parameters
 
-![example distribution image](https://raw.githubusercontent.com/vosjo/emcmass/master/docs/docs/source/images/example_distribution.png)
+![example distribution image](https://raw.githubusercontent.com/vosjo/emcmass/master/docs/source/images/example_distribution.png)
 
 3) The observations with the best fitting model in the HR diagram
 
-![example HR image](https://raw.githubusercontent.com/vosjo/emcmass/master/docs/docs/source/images/example_HR.png)
+![example HR image](https://raw.githubusercontent.com/vosjo/emcmass/master/docs/source/images/example_HR.png)

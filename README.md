@@ -1,7 +1,7 @@
 # EMCMASS
 
 Determine stellar masses by fitting MIST stellar evolution models to observed 
-atmospheric parameters. Uses the Markov chain Monte Carlo  implemented in EMCEE.
+atmospheric parameters. Uses the Markov chain Monte Carlo method as implemented in [EMCEE](https://emcee.readthedocs.io/en/latest/?badge=latest).
 
 [![Documentation Status](https://readthedocs.org/projects/emcmass/badge/?version=latest)](https://emcmass.readthedocs.io/en/latest/?badge=latest)
 
@@ -130,11 +130,13 @@ that can help with the interpretation of the results. When using the command lin
 flag to get the three possible figures. When using the input file option, you can specify which figures you want 
 in the plot part of the input file. The three possible figures are:
 
-1) The 'fit' image:
+1) The 'fit' image, which shows for each observable how it compares to the samples in the MCMC process.
 
 ![example fit image](https://raw.githubusercontent.com/vosjo/emcmass/master/docs/source/images/example_fit.png)
 
-2) The distribution of the parameters
+2) The distribution plot shows the location of all samples of the MCMC process for the 3 included parameters, as well 
+as the distribution for each parameter individually with the 1 and 3 sigma confidence levels indicated on the plot. 
+Requires the  [corner](https://corner.readthedocs.io/en/latest/) package.
 
 ![example distribution image](https://raw.githubusercontent.com/vosjo/emcmass/master/docs/source/images/example_distribution.png)
 

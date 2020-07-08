@@ -22,10 +22,9 @@ gravity, radius, luminosity and metallicity. The best fitting model will determi
 the observed star.
 
 EMCMASS can be used directly from the command line. The most basic use only supplies the observables with their errors
-and uses the default settings of the MCMC algorithm. In the case below we use emcmass to determine the mass of a star 
-with Teff = 4677 +- 500 K, logg = 4.70 +- 0.40 and a metallicity of [Fe/H] = -0.42 +- 0.25
+and uses the default settings of the MCMC algorithm. In the case below we use emcmass to determine the mass of the sun:
 
-    emcmass log_Teff 3.67 0.05 log_g 4.70 0.40 M_H -0.42 0.25
+    emcmass Teff 5778 250 log_g 4.43 0.25 R 1.0 0.5 L 1.0 0.5 M_H 0.0 0.05
     
 The output of this process will look like this:
 
@@ -42,9 +41,11 @@ Limits applied to the model grid parameters:
    phase = 0 -> 400
 
 Observables included in fit:
-   log_Teff = 3.67 +- 0.05
-   log_g = 4.7 +- 0.4
-   M_H = -0.42 +- 0.25
+   log_Teff = 3.7617775375081783 +- 0.01879067151263413
+   log_g = 4.43 +- 0.25
+   log_R = 0.0 +- 0.217145
+   log_L = 0.0 +- 0.217145
+   M_H = 0.0 +- 0.05
 
 MCMC setup:
    # walkers: 100
@@ -58,12 +59,19 @@ New limits to match up with grid points:
 
 Resulting parameters values and errors:
    Par          Best    Pc      emin     emax
-   mass_init  = 0.654   0.617   -0.229   +0.191
-   M_H_init   = -0.411   -0.348   -0.265   +0.251
-   phase      = 105.404   175.610   -79.979   +85.166
+   mass_init  = 1.000   1.015   -0.077   +0.073
+   M_H_init   = 0.047   0.042   -0.058   +0.056
+   phase      = 192.465   180.403   -74.394   +65.995
 ```
 
-The best fitting model has a mass of 0.654 +- 0.20 Msol.
+Not surprisingly the best fitting model has a mass of 1 Msol. You may have notices that EMCMASS automatically takes the 
+logarithm of the observables. This is because the MIST models provide only the logarithm of these variables. EMCMASS 
+can recognize the following observables:
+- Teff, log_Teff
+- g, log_g
+- R, log_R
+- L, log_L
+- M_H ([M/H] usually equivalent with [Fe/H])
 
 More options can be seen with the help command:
 
@@ -91,11 +99,11 @@ limits:
 - [100, 400]
 # Observables name: [value, error]
 observables: 
-  Teff: [5740, 50]
-  L: [1.0, 0.1]
-  R: [1.0, 0.1]
-  log_g: [4.5, 0.5]
-  M_H: [0.0, 0.1]
+  Teff: [5778, 250]
+  L: [1.0, 0.05]
+  R: [1.0, 0.05]
+  log_g: [4.43, 0.25]
+  M_H: [0.0, 0.05]
 # The name of the evolution model to use (only mist is supported for now)
 model: mist
 # setup for the MCMC algorithm

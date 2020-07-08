@@ -19,12 +19,12 @@ limits:
 - [100, 400]
 # Observables name: [value, error]
 observables: 
-  Teff: [5740, 50]
-  L: [1.0, 0.1]
-  R: [1.0, 0.1]
-  log_g: [4.5, 0.5]
-  M_H: [0.0, 0.1]
-# The name of the evolution model to use (mist, yapsi)
+  Teff: [5778, 250]
+  L: [1.0, 0.05]
+  R: [1.0, 0.05]
+  log_g: [4.43, 0.25]
+  M_H: [0.0, 0.05]
+# The name of the evolution model to use (only mist is supported for now)
 model: mist
 # setup for the MCMC algorithm
 nwalkers: 100    # total number of walkers
@@ -37,14 +37,14 @@ percentiles: [0.2, 50, 99.8] # 16 - 84 corresponds to 1 sigma
 datafile: none   # filepath to write results of all walkers
 plot1:
  type: fit
- path: ./results/<objectname>_fit.png
+ path: <objectname>_fit.png
 plot2:
  type: distribution
- path: ./results/<objectname>_distribution.png
+ path: <objectname>_distribution.png
  parameters: ['mass_init', 'phase', 'M_H_init']
 plot3:
  type: HR
- path: ./results/<objectname>_HR.png
+ path: <objectname>_HR.png
 """
 
 
@@ -130,7 +130,7 @@ def main():
             variables = np.reshape(variables, (-1, 3))
             y = np.array(variables[:, 1], dtype=float)
             yerr = np.array(variables[:, 2], dtype=float)
-            variables = np.array(variables[:, 0], dtype='a10')
+            variables = np.array(variables[:, 0], dtype='U10')
 
         elif len(variables) > 0:
             print("Could not understand observables!")
@@ -211,7 +211,7 @@ def main():
             if p in samples.dtype.names:
                 pars.append(p)
 
-        data = samples[pars]
+        data = repack_fields(samples[pars])
 
         fig = corner.corner(data.view(np.float64).reshape(data.shape + (-1,)),
                             labels=[plotting.get_label(p) for p in data.dtype.names],
